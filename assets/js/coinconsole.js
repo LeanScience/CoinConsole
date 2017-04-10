@@ -30,23 +30,42 @@ var information = document.getElementById('information'),
     filterbar = document.getElementById('filterbar'),
     filter = document.getElementById('filter'),
 
-    welcomeMessage = '<div class="get-started"><h2 class="hidden-mobile no-margin">Click on the filter icon to get started!</h2><h3>Select which coins you want to display on your dashboard.</h3></div>';
+    numberOfCurrencies = document.getElementById('total-currencies'),
+    totalMarketCap = document.getElementById('total-market-cap'),
+    totalTradeVolume = document.getElementById('total-volume'),
+    bitcoinDominance = document.getElementById('btc-dominance'),
+
+    welcomeMessage = '<div class="get-started"><h2>Click a button on the filter to select which currencies you want to display on your dashboard.</h2></div>';
 
 //connect to the websocket server on page load
 var socket = io.connect('//' + window.location.hostname + ':' + websocketPort),
-    globalData;
+    globalData,
+    tickerData;
 
 //initiate the page
 socket.on('init', function(){
-  createFilterList(globalData); //create the new list of coins for the filter
+  createFilterList(tickerData); //create the new list of coins for the filter
 });
 
 //listen for refreshed data
-socket.on('refresh', function(data){
+socket.on('refreshGlobal', function(data){
   globalData = JSON.parse(data);
+
+  updateGlobal(globalData);
+});
+
+socket.on('refreshTicker', function(data){
+  tickerData = JSON.parse(data);
 
   updateInformation(displayList);
 });
+
+function updateGlobal(o){
+  numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
+  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney() + " Market Cap";
+  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney() + " Trade Volume";
+  bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
+}
 
 //set up a function to create the filter list
 function createFilterList(a){
@@ -71,7 +90,7 @@ function createFilterList(a){
 
 function activeCheck(s){
   searchArray(displayList, s).then(function(result){
-    for (coin in globalData){
+    for (var coin in tickerData){
 
     }
   });
@@ -80,27 +99,56 @@ function activeCheck(s){
 function filterSearch(term){
   if (term == ''){
     //reset the filter if the search term is empty
-    createFilterList(globalData);
+    createFilterList(tickerData);
   } else {
     //search the available coins for the term and rerender the filter
-    searchArray(globalData, term, "name").then(function(result){
+    searchArray(tickerData, term, "name").then(function(result){
       createFilterList(result);
     });
   }
 }
 
-function searchArray(a, s, k){
+function clearSearch(e){
+  if (document.getElementById(e)) {
+    document.getElementById(e).value = '';
+    createFilterList(tickerData);
+  }
+}
+
+function searchArray(a, t, k, lt){
   return new Promise(function(resolve, reject){
     if (k) {
-      //if an object key value is passed in
-      resolve(a.filter(function(element) {
-        return element[k].toString().toLowerCase().indexOf(s.toLowerCase()) > -1;
-      }));
+      if (typeof t === 'string') {
+        resolve(a.filter(function(element) {
+          return element[k].toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
+        }));
+      } else {
+        if (lt == true) {
+          resolve(a.filter(function(element) {
+            return element[k] <= t;
+          }));
+        } else {
+          resolve(a.filter(function(element) {
+            return element[k] >= t;
+          }));
+        }
+      }
     } else {
-      //if we're searching through a simple array
-      resolve(a.filter(function(element) {
-        return element.toString().toLowerCase().indexOf(s.toLowerCase()) > -1;
-      }));
+      if (typeof t === 'string') {
+        resolve(a.filter(function(element) {
+          return element.toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
+        }));
+      } else {
+        if (lt == true) {
+          resolve(a.filter(function(element) {
+            return element <= t;
+          }));
+        } else {
+          resolve(a.filter(function(element) {
+            return element >= t;
+          }));
+        }
+      }
     }
   });
 }
@@ -113,25 +161,75 @@ function createFilterItem(s){
 }
 
 //toggle the filter list
-var toggled = false; //default is untoggled
+var toggled = false; //default is toggled
 
-function toggleFilter(){
+toggleFilter();
+
+function toggleFilter() {
   if (toggled == false) {
     //show the filter
     filterbar.style.display = "flex";
     toggled = true;
+    document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
+    checkToggleFilterPosition();
   } else if (toggled == true) {
     //hide the filter
     filterbar.style.display = "none";
     toggled = false;
+    document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
+    checkToggleFilterPosition();
   }
 }
 
+function checkToggleFilterPosition() {
+  var filterToggleIcon = document.getElementById('filter-toggle-icon');
+
+  if (window.innerWidth <= 768) {
+    if (filterToggleIcon.className === "fa fa-angle-right") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-down";
+    } else if (filterToggleIcon.className === "fa fa-angle-left") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-up";
+    }
+  } else {
+    if (filterToggleIcon.className === "fa fa-angle-up") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
+    } else if (filterToggleIcon.className === "fa fa-angle-down") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
+    }
+  }
+}
+
+window.onresize = checkToggleFilterPosition;
+
 //toggle coin data on and off
-if (QueryString.display) {
-  var displayList = QueryString.display.toLowerCase().split(",");
-} else {
-  var displayList = [];
+var displayList;
+
+function getUrlDisplayList() {
+  if (QueryString.display) {
+    displayList = QueryString.display.toLowerCase().split(",");
+  } else {
+    displayList = [];
+  }
+}
+
+getUrlDisplayList();
+
+function toggleTop(){
+  toggleReset();
+  searchArray(tickerData, 200, "rank", true)
+  .then(function(topTwoHundredData){
+    for (var coin in topTwoHundredData) {
+      displayList.push(topTwoHundredData[coin].symbol);
+    }
+  }).then(function(){
+    updateInformation(displayList);
+    window.location.search = window.location.search;
+  });
+}
+
+function toggleReset(){
+  displayList = [];
+  updateInformation(displayList);
 }
 
 function toggleCoin(coin){
@@ -148,29 +246,6 @@ function toggleCoin(coin){
       updateInformation(displayList);
     }
   });
-}
-
-function toggleTop(){
-  var populateList = new Promise(function(resolve, reject){
-    toggleReset();
-    for (var coin in globalData){
-      if (coin >= 200){
-        resolve();
-      } else {
-        displayList.push(globalData[coin].symbol);
-      }
-    }
-  });
-
-  populateList.then(function(){
-    updateInformation(displayList);
-    window.location.search = window.location.search;
-  });
-}
-
-function toggleReset(){
-  displayList = [];
-  updateInformation(displayList);
 }
 
 function updateURL(a){
@@ -213,9 +288,9 @@ function updateInformation(a){
 
 function selectCoinInfo(coin) {
   return new Promise(function(resolve, reject){
-    for (var index in globalData) {
-      if (globalData[index].symbol.toLowerCase() === coin){
-        resolve(globalData[index]);
+    for (var index in tickerData) {
+      if (tickerData[index].symbol.toLowerCase() === coin){
+        resolve(tickerData[index]);
         break;
       }
     }
@@ -224,23 +299,20 @@ function selectCoinInfo(coin) {
 
 function createInformationList(a){
   return new Promise(function(resolve, reject){
-    var title = a.symbol,
+    var title = a.name,
         priceUsd = parseFloat(a.price_usd),
         priceUsd = ((priceUsd > 1) ? priceUsd.formatMoney(2, ".", ",") : priceUsd = priceUsd.formatMoney(8, ".", ",")),
         priceBtc = parseFloat(a.price_btc).toFixed(8),
         volume = parseFloat(a["24h_volume_usd"]).formatMoney(0, ".", ","),
         marketCap = parseFloat(a.market_cap_usd).formatMoney(0, ".", ","),
-        oneHour = parseInt(a["percent_change_1h"]),
-        twentyFourHour = parseInt(a["percent_change_24h"]),
-        sevenDay = parseInt(a["percent_change_7d"]),
+        oneHour = parseFloat(a["percent_change_1h"]),
+        twentyFourHour = parseFloat(a["percent_change_24h"]),
+        sevenDay = parseFloat(a["percent_change_7d"]),
         rank = parseInt(a.rank);
 
-    var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>');
-    var twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>');
-    var sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
-
-    //var twentyFourHourChangeHTML = "<h4 class='twenty-four-hour' style='padding: 0 7px;'>24H: " + twentyFourHour + "%</h4>";
-    //var sevenDayChangeHTML = "<h4 class='seven-day'>7D: " + sevenDay + "%</h4></div>";
+    var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>'),
+        twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>'),
+        sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
 
     var titleHTML = '<h3 class="no-margin">' + title + '<small class="rank"> #' + rank + '</small>' + '</h3>',
         priceUsdHTML = '<h4 class="no-margin">USD: $' + priceUsd + '</h4>',

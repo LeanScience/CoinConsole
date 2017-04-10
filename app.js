@@ -13,7 +13,17 @@ var http = require("http"),
 
     app = express();
 
-var options = {
+var globalDataOptions = {
+  "method": "GET",
+  "hostname": "api.coinmarketcap.com",
+  "port": null,
+  "path": "/v1/global/",
+  "headers": {
+    "cache-control": "no-cache"
+  }
+};
+
+var tickerDataOptions = {
   "method": "GET",
   "hostname": "api.coinmarketcap.com",
   "port": null,
@@ -24,23 +34,23 @@ var options = {
 };
 
 var globalData,
-    userRefreshRate = 5; //number of seconds before a user can successfully refresh
+    tickerData,
+    userRefreshRate = 7.5; //number of seconds before updates are sent to the client
 
 //listen for websocket connections
 websock.on('connection', function(socket){
-  console.log("%s has connected to the server.", socket.id);
 
   //send initial data
-  console.log('Sending initial coin data to %s...', socket.id);
-  socket.emit('refresh', globalData);
+  socket.emit('refreshTicker', tickerData);
+  socket.emit('refreshGlobal', globalData);
 
   //ping the client to initiate the page
-  socket.emit('init');
+  socket.emit('init', globalData);
 
   //refresh the data every 'userRefreshRate' seconds
   var userRefreshTimer = setInterval(function() {
-    console.log('Refreshing data for %s...', socket.id);
-    socket.emit('refresh', globalData);
+    socket.emit('refreshTicker', tickerData);
+    socket.emit('refreshGlobal', globalData);
   }, userRefreshRate * 1000);
 
   socket.on('disconnect', function () {
@@ -51,10 +61,9 @@ websock.on('connection', function(socket){
   });
 });
 
-function getCoinData() {
+function getTickerData() {
   let cmcGET = new Promise(function(resolve, reject) {
-    console.log('New request to refresh the coinmarketcap data.');
-    var request = http.request(options, function(response) {
+    var request = http.request(tickerDataOptions, function(response) {
       var chunks = [];
 
       response.on("data", function(chunk) {
@@ -77,7 +86,40 @@ function getCoinData() {
 
   cmcGET.then(function(data){
     if(data && data != 'undefined'){
-      console.log('Successfully refreshed the coinmarketcap data!');
+      tickerData = data;
+      return data;
+    }
+  }).catch(function(err){
+    console.log(err);
+    return 'There was an error! ' + err;
+  });
+}
+
+function getGlobalData() {
+  let cmcGET = new Promise(function(resolve, reject) {
+    var request = http.request(globalDataOptions, function(response) {
+      var chunks = [];
+
+      response.on("data", function(chunk) {
+        chunks.push(chunk);
+      });
+
+      response.on("end", function() {
+        var data = Buffer.concat(chunks);
+        resolve(data.toString());
+      });
+    });
+
+    request.on('error', (err) => {
+      console.log('ERROR CONTACTING THE API! %s', err);
+      reject(Error(err));
+    });
+
+    request.end();
+  });
+
+  cmcGET.then(function(data){
+    if(data && data != 'undefined'){
       globalData = data;
       return data;
     }
@@ -88,11 +130,13 @@ function getCoinData() {
 }
 
 //Get coin data on server start
-getCoinData();
+getTickerData();
+getGlobalData();
 
 //Get coin data every minute - time will decrease at go-live
 var autoRefresh = setInterval(function(){
-  getCoinData();
+  getTickerData();
+  getGlobalData();
 }, 15 * 1000);
 
 /*    ROUTES    */
@@ -106,7 +150,7 @@ app.set('view engine', 'pug');
 app.set('views', cd + '/views');
 
 //oh yeah, we want our styles and scripts to be available, too...
-app.use( '/assets', express.static( cd + '/assets' ) );
+app.use('/assets', express.static(cd + '/assets'));
 
 //start the web server
-app.listen(webport, console.log("Web server started on port %s...", webport));
+app.listen(webport);
