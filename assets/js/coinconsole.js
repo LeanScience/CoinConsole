@@ -102,8 +102,11 @@ function filterSearch(term){
     createFilterList(tickerData);
   } else {
     //search the available coins for the term and rerender the filter
-    searchArray(tickerData, term, "name").then(function(result){
-      createFilterList(result);
+    searchArray(tickerData, term, "name").then(function(resultName){
+      searchArray(tickerData, term, "symbol").then(function(resultSymbol){
+        var results = resultName.concat(resultSymbol).unique();
+        createFilterList(results);
+      });
     });
   }
 }
@@ -289,7 +292,7 @@ function updateInformation(a){
 function selectCoinInfo(coin) {
   return new Promise(function(resolve, reject){
     for (var index in tickerData) {
-      if (tickerData[index].symbol.toLowerCase() === coin){
+      if (typeof tickerData[index].symbol === 'string' && tickerData[index].symbol.toLowerCase() === coin){
         resolve(tickerData[index]);
         break;
       }
@@ -325,6 +328,11 @@ function createInformationList(a){
   });
 }
 
+function shareLink(){
+  //future button function to share a link to that specific coinconsole
+  //maybe some url shortening could be added to this function to make it... well... shorter
+}
+
 Number.prototype.formatMoney = function(c, d, t){
   var n = this,
       c = isNaN(c = Math.abs(c)) ? 2 : c,
@@ -336,7 +344,11 @@ Number.prototype.formatMoney = function(c, d, t){
      return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
 
-function shareLink(){
-  //future button function to share a link to that specific coinconsole
-  //maybe some url shortening could be added to this function to make it... well... shorter
+Array.prototype.unique = function() {
+    return this.reduce(function(accum, current) {
+        if (accum.indexOf(current) < 0) {
+            accum.push(current);
+        }
+        return accum;
+    }, []);
 }
