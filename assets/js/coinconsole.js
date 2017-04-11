@@ -62,8 +62,8 @@ socket.on('refreshTicker', function(data){
 
 function updateGlobal(o){
   numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
-  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney() + " Market Cap";
-  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney() + " Trade Volume";
+  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
+  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
   bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
 }
 
