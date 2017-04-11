@@ -393,7 +393,7 @@ a:hover {
     justify-content: center;
     align-items: center;
     text-align: center;
-    width: calc(100% - 25px);
+    width: calc(100% - 10px);
     background-color: #2265b1;
     padding: 0 5px;
     color: white;
