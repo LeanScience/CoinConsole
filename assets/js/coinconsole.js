@@ -74,8 +74,10 @@ function createFilterList(a){
   var result = new Promise(function(resolve, reject){
     var html = '';
     for (var coin in a) {
-      var coinName = a[coin].symbol;
-      html = html + createFilterItem(coinName);
+      if (a[coin].symbol) {
+        var coinName = a[coin].symbol;
+        html = html + createFilterItem(coinName);
+      }
     }
     resolve(html);
   });
