@@ -62,8 +62,8 @@ socket.on('refreshTicker', function(data){
 
 function updateGlobal(o){
   numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
-  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney() + " Market Cap";
-  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney() + " Trade Volume";
+  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
+  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
   bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
 }
 
@@ -74,8 +74,10 @@ function createFilterList(a){
   var result = new Promise(function(resolve, reject){
     var html = '';
     for (var coin in a) {
-      var coinName = a[coin].symbol;
-      html = html + createFilterItem(coinName);
+      if (a[coin].symbol) {
+        var coinName = a[coin].symbol;
+        html = html + createFilterItem(coinName);
+      }
     }
     resolve(html);
   });
@@ -222,7 +224,9 @@ function toggleTop(){
   searchArray(tickerData, 200, "rank", true)
   .then(function(topTwoHundredData){
     for (var coin in topTwoHundredData) {
-      displayList.push(topTwoHundredData[coin].symbol);
+      if (topTwoHundredData[coin].symbol) {
+        displayList.push(topTwoHundredData[coin].symbol);
+      }
     }
   }).then(function(){
     updateInformation(displayList);
@@ -292,7 +296,7 @@ function updateInformation(a){
 function selectCoinInfo(coin) {
   return new Promise(function(resolve, reject){
     for (var index in tickerData) {
-      if (typeof tickerData[index].symbol === 'string' && tickerData[index].symbol.toLowerCase() === coin){
+      if (tickerData[index].symbol && tickerData[index].symbol !== "undefined" && typeof tickerData[index].symbol === 'string' && tickerData[index].symbol.toLowerCase() === coin){
         resolve(tickerData[index]);
         break;
       }
@@ -300,31 +304,33 @@ function selectCoinInfo(coin) {
   });
 }
 
-function createInformationList(a){
+function createInformationList(o){
   return new Promise(function(resolve, reject){
-    var title = a.name,
-        priceUsd = parseFloat(a.price_usd),
-        priceUsd = ((priceUsd > 1) ? priceUsd.formatMoney(2, ".", ",") : priceUsd = priceUsd.formatMoney(8, ".", ",")),
-        priceBtc = parseFloat(a.price_btc).toFixed(8),
-        volume = parseFloat(a["24h_volume_usd"]).formatMoney(0, ".", ","),
-        marketCap = parseFloat(a.market_cap_usd).formatMoney(0, ".", ","),
-        oneHour = parseFloat(a["percent_change_1h"]),
-        twentyFourHour = parseFloat(a["percent_change_24h"]),
-        sevenDay = parseFloat(a["percent_change_7d"]),
-        rank = parseInt(a.rank);
+    if (o.name) {
+      var title = o.name,
+          priceUsd = parseFloat(o.price_usd),
+          priceUsd = ((priceUsd > 1) ? priceUsd.formatMoney(2, ".", ",") : priceUsd = priceUsd.formatMoney(8, ".", ",")),
+          priceBtc = parseFloat(o.price_btc).toFixed(8),
+          volume = parseFloat(o["24h_volume_usd"]).formatMoney(0, ".", ","),
+          marketCap = parseFloat(o.market_cap_usd).formatMoney(0, ".", ","),
+          oneHour = parseFloat(o["percent_change_1h"]),
+          twentyFourHour = parseFloat(o["percent_change_24h"]),
+          sevenDay = parseFloat(o["percent_change_7d"]),
+          rank = parseInt(o.rank);
 
-    var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>'),
-        twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>'),
-        sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
+      var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>'),
+          twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>'),
+          sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
 
-    var titleHTML = '<h3 class="no-margin">' + title + '<small class="rank"> #' + rank + '</small>' + '</h3>',
-        priceUsdHTML = '<h4 class="no-margin">USD: $' + priceUsd + '</h4>',
-        priceBtcHTML = '<h4 class="no-margin">BTC: ' + priceBtc + '</h4>',
-        volumeHTML = '<h4 class="no-margin">Volume: $' + volume + '</h4>',
-        marketCapHTML = '<h4 class="no-margin">Market Cap: $' + marketCap + '</h4>',
-        result = '<li class="inline information-item"><div id=' + title + '">' + titleHTML + priceUsdHTML + priceBtcHTML + volumeHTML + marketCapHTML + '<div class="percent-changes no-padding">' + oneHourChangeHTML + twentyFourHourChangeHTML + sevenDayChangeHTML + '</div>' + '</div></li>';
+      var titleHTML = '<h3 class="no-margin">' + title + '<small class="rank"> #' + rank + '</small>' + '</h3>',
+          priceUsdHTML = '<h4 class="no-margin">USD: $' + priceUsd + '</h4>',
+          priceBtcHTML = '<h4 class="no-margin">BTC: ' + priceBtc + '</h4>',
+          volumeHTML = '<h4 class="no-margin">Volume: $' + volume + '</h4>',
+          marketCapHTML = '<h4 class="no-margin">Market Cap: $' + marketCap + '</h4>',
+          result = '<li class="inline information-item"><div id=' + title + '">' + titleHTML + priceUsdHTML + priceBtcHTML + volumeHTML + marketCapHTML + '<div class="percent-changes no-padding">' + oneHourChangeHTML + twentyFourHourChangeHTML + sevenDayChangeHTML + '</div>' + '</div></li>';
 
-    resolve(result);
+      resolve(result);
+    }
   });
 }
 
