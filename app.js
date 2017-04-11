@@ -35,7 +35,7 @@ var tickerDataOptions = {
 
 var globalData,
     tickerData,
-    userRefreshRate = 7.5; //number of seconds before updates are sent to the client
+    userRefreshRate = 7.5; //number of seconds before data updates are sent to the client
 
 //listen for websocket connections
 websock.on('connection', function(socket){
@@ -54,7 +54,6 @@ websock.on('connection', function(socket){
   }, userRefreshRate * 1000);
 
   socket.on('disconnect', function () {
-    console.log("%s has disconnected.", socket.id);
     //Destroy the refresh timer for this user
     clearInterval(userRefreshTimer);
     userRefreshTimer = null;
@@ -140,7 +139,7 @@ var autoRefresh = setInterval(function(){
 }, 15 * 1000);
 
 /*    ROUTES    */
-//home page
+//application page
 app.get('/', function(req, res){
   res.render('index');
 });
