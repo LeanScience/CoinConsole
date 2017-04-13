@@ -280,7 +280,8 @@ function updateInformation(a){
             asyncLoop += 1;
             html = html + informationList;
             if (asyncLoop == a.length) resolve(html);
-          });
+          })
+          .then(Sortable.create(information));
         });
       }
     });
