@@ -6,7 +6,7 @@ var http = require("http"),
     path = require('path'),
 
     cd = __dirname,
-    webport = 3002,
+    webport = 8080,
     socketport = 3004,
 
     websock = require('socket.io')( socketport ),
