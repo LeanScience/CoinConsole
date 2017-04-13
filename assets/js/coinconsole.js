@@ -1,34 +1,16 @@
 "use strict";
 
-var QueryString = function() {
- // This function is anonymous, is executed immediately and
- // the return value is assigned to QueryString!
- var query_string = {};
- //window.location.search for "?x=y" url params -- this requires us to refresh the page when changed, though
- var query = window.location.hash.substring(1);
- var vars = query.split("&");
- for (var i=0;i<vars.length;i++) {
-   var pair = vars[i].split("=");
-       // If first entry with this name
-   if (typeof query_string[pair[0]] === "undefined") {
-     query_string[pair[0]] = decodeURIComponent(pair[1]);
-       // If second entry with this name
-   } else if (typeof query_string[pair[0]] === "string") {
-     var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
-     query_string[pair[0]] = arr;
-       // If third or later entry with this name
-   } else {
-     query_string[pair[0]].push(decodeURIComponent(pair[1]));
-   }
- }
- return query_string;
-}();
+//Check whether or not the client is in mobile and adjust the filter-toggle icon based on the width of the device
+window.onresize = checkToggleFilterPosition;
+
+var QueryString = getUrlParams();
 
 var websocketPort = 3004;
 
 var information = document.getElementById('information'),
     filterbar = document.getElementById('filterbar'),
     filter = document.getElementById('filter'),
+    sort = document.getElementById('sort'),
 
     numberOfCurrencies = document.getElementById('total-currencies'),
     totalMarketCap = document.getElementById('total-market-cap'),
@@ -45,6 +27,20 @@ var socket = io.connect('//' + window.location.hostname + ':' + websocketPort),
 //initiate the page
 socket.on('init', function(){
   createFilterList(tickerData); //create the new list of coins for the filter
+  createSortList(tickerData);
+
+  function createSortList(o){
+    sort.innerHTML = '';
+    var html = '',
+        info = Object.keys(o[0]),
+        asyncLoop = 0;
+
+    for (var option in info){
+      asyncLoop += 1;
+      var html = html + '<option value="' + info[option] + '">' + info[option] + '</option>';
+      ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+    }
+  }
 });
 
 //listen for refreshed data
@@ -52,42 +48,51 @@ socket.on('refreshGlobal', function(data){
   globalData = JSON.parse(data);
 
   updateGlobal(globalData);
+
+  function updateGlobal(o){
+    numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
+    totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
+    totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
+    bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
+  }
 });
 
 socket.on('refreshTicker', function(data){
   tickerData = JSON.parse(data);
 
+  convertTickerData();
+
+  function convertTickerData() {
+    for (var ticker in tickerData) {
+      if (typeof tickerData[ticker] === "object") {
+        for (var key in tickerData[ticker]) {
+          if (! isNaN(parseFloat(tickerData[ticker][key]))) {
+            tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
+          }
+        }
+      }
+    }
+  }
+
   updateInformation(displayList);
 });
-
-function updateGlobal(o){
-  numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
-  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
-  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
-  bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
-}
 
 //set up a function to create the filter list
 function createFilterList(a){
   filter.innerHTML = '';
-
-  var result = new Promise(function(resolve, reject){
-    var html = '';
-    for (var coin in a) {
-      if (a[coin].symbol) {
-        var coinName = a[coin].symbol;
-        html = html + createFilterItem(coinName);
-      }
+  var html = '',
+      asyncLoop = 0;
+  for (var coin in a) {
+    if (a[coin].symbol) {
+      asyncLoop += 1;
+      var coinName = a[coin].symbol;
+      html = html + createFilterItem(coinName);
+      ((asyncLoop === a.length) ? filter.innerHTML = html : html);
     }
-    resolve(html);
-  });
+  }
 
-  result.then(function(filterList){
-    filter.innerHTML = filterList;
-
-    //check for active coins and style them
-    //this is a future issue
-  });
+  //check for active coins and style them
+  //this is a future issue
 }
 
 function activeCheck(s){
@@ -120,44 +125,6 @@ function clearSearch(e){
   }
 }
 
-function searchArray(a, t, k, lt){
-  return new Promise(function(resolve, reject){
-    if (k) {
-      if (typeof t === 'string') {
-        resolve(a.filter(function(element) {
-          return element[k].toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
-        }));
-      } else {
-        if (lt == true) {
-          resolve(a.filter(function(element) {
-            return element[k] <= t;
-          }));
-        } else {
-          resolve(a.filter(function(element) {
-            return element[k] >= t;
-          }));
-        }
-      }
-    } else {
-      if (typeof t === 'string') {
-        resolve(a.filter(function(element) {
-          return element.toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
-        }));
-      } else {
-        if (lt == true) {
-          resolve(a.filter(function(element) {
-            return element <= t;
-          }));
-        } else {
-          resolve(a.filter(function(element) {
-            return element >= t;
-          }));
-        }
-      }
-    }
-  });
-}
-
 //make a filter checkbox
 function createFilterItem(s){
   var result = '<li class="no-margin no-dot btn btn-blue" onClick="toggleCoin(this.innerHTML.toLowerCase())">' + s + '</li>';
@@ -166,21 +133,21 @@ function createFilterItem(s){
 }
 
 //toggle the filter list
-var toggled = false; //default is toggled
+var untoggled = false; //default is toggled
 
 toggleFilter();
 
 function toggleFilter() {
-  if (toggled == false) {
+  if (untoggled == false) {
     //show the filter
     filterbar.style.display = "flex";
-    toggled = true;
+    untoggled = true;
     document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
     checkToggleFilterPosition();
-  } else if (toggled == true) {
+  } else if (untoggled == true) {
     //hide the filter
     filterbar.style.display = "none";
-    toggled = false;
+    untoggled = false;
     document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
     checkToggleFilterPosition();
   }
@@ -204,10 +171,9 @@ function checkToggleFilterPosition() {
   }
 }
 
-window.onresize = checkToggleFilterPosition;
-
 //toggle coin data on and off
 var displayList;
+getUrlDisplayList(); //grab the coins from the url bar
 
 function getUrlDisplayList() {
   if (QueryString.display) {
@@ -216,8 +182,6 @@ function getUrlDisplayList() {
     displayList = [];
   }
 }
-
-getUrlDisplayList();
 
 function toggleTop(){
   toggleReset();
@@ -270,27 +234,53 @@ function updateURL(a){
 function updateInformation(a){
   updateURL(a);
 
-  if (a.length != 0){
-    var result = new Promise(function(resolve, reject){
-      var html = '',
-      asyncLoop = 0;
-      for (var coin in a) {
-        selectCoinInfo(a[coin]).then(function(coinInfo){
-          createInformationList(coinInfo).then(function(informationList){
-            asyncLoop += 1;
-            html = html + informationList;
-            if (asyncLoop == a.length) resolve(html);
-          })
-          .then(Sortable.create(information));
-        });
-      }
-    });
-
-    result.then(function(informationList){
-      information.innerHTML = informationList;
+  if (a.length && a.length != 0){
+    selectInformationList()
+    .then(function(informationList){
+      sortInformationList(informationList);
+      renderInformationList(informationList);
     });
   } else {
     information.innerHTML = welcomeMessage;
+  }
+
+  function selectInformationList(){
+    return new Promise(function(resolve, reject){
+      var asyncLoop = 0,
+          coinInfoList = [];
+
+      for (var coin in a) {
+        asyncLoop += 1;
+        selectCoinInfo(a[coin]).then(function(coinInfo){
+          coinInfoList.push(coinInfo);
+        });
+        ((asyncLoop == a.length) ? resolve(coinInfoList) : asyncLoop);
+      }
+    });
+  }
+
+  function sortInformationList(a){
+    ((sort.value) ? a.sortOn(sort.value) : sort.value);
+  }
+
+  function renderInformationList(a){
+    var html = '',
+        asyncLoop = 0;
+
+    for (var coin in a) {
+      if (typeof a[coin] == "object") {
+        asyncLoop += 1;
+        createInformationListHTML(a[coin]).then(function(informationListHTML){
+          html = html + informationListHTML;
+          ((asyncLoop == a.length) ? displayInformationList(html) : asyncLoop);
+          console.log(html);
+        });
+      }
+    }
+  }
+
+  function displayInformationList(h) {
+    information.innerHTML = h;
   }
 }
 
@@ -305,7 +295,7 @@ function selectCoinInfo(coin) {
   });
 }
 
-function createInformationList(o){
+function createInformationListHTML(o){
   return new Promise(function(resolve, reject){
     if (o.name) {
       var title = o.name,
@@ -340,6 +330,66 @@ function shareLink(){
   //maybe some url shortening could be added to this function to make it... well... shorter
 }
 
+function searchArray(a, t, k, lt){
+  return new Promise(function(resolve, reject){
+    if (k) {
+      if (typeof t === 'string') {
+        resolve(a.filter(function(element) {
+          return element[k].toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
+        }));
+      } else {
+        if (lt == true) {
+          resolve(a.filter(function(element) {
+            return element[k] <= t;
+          }));
+        } else {
+          resolve(a.filter(function(element) {
+            return element[k] >= t;
+          }));
+        }
+      }
+    } else {
+      if (typeof t === 'string') {
+        resolve(a.filter(function(element) {
+          return element.toString().toLowerCase().indexOf(t.toLowerCase()) > -1;
+        }));
+      } else {
+        if (lt == true) {
+          resolve(a.filter(function(element) {
+            return element <= t;
+          }));
+        } else {
+          resolve(a.filter(function(element) {
+            return element >= t;
+          }));
+        }
+      }
+    }
+  });
+}
+
+function getUrlParams() {
+ var query_string = {};
+ //window.location.search for "?x=y" url params -- this requires us to refresh the page when changed, though
+ var query = window.location.hash.substring(1);
+ var vars = query.split("&");
+ for (var i=0;i<vars.length;i++) {
+   var pair = vars[i].split("=");
+       // If first entry with this name
+   if (typeof query_string[pair[0]] === "undefined") {
+     query_string[pair[0]] = decodeURIComponent(pair[1]);
+       // If second entry with this name
+   } else if (typeof query_string[pair[0]] === "string") {
+     var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+     query_string[pair[0]] = arr;
+       // If third or later entry with this name
+   } else {
+     query_string[pair[0]].push(decodeURIComponent(pair[1]));
+   }
+ }
+ return query_string;
+};
+
 Number.prototype.formatMoney = function(c, d, t){
   var n = this,
       c = isNaN(c = Math.abs(c)) ? 2 : c,
@@ -358,4 +408,15 @@ Array.prototype.unique = function() {
         }
         return accum;
     }, []);
+}
+
+Array.prototype.sortOn = function(key){
+  this.sort(function(a, b){
+      if(a[key] < b[key]){
+          return -1;
+      }else if(a[key] > b[key]){
+          return 1;
+      }
+      return 0;
+  });
 }

@@ -11,8 +11,9 @@ block content
           input#filter-search.transition(type="text" placeholder="Search..." onkeyup="filterSearch(this.value);")
           i.search-clear.fa.fa-times-circle.transition(onclick="clearSearch('filter-search');")
         div.toggle-buttons
-          div.btn.btn-yellow.toggle-all(onclick="toggleTop();") Top 200
-          div.btn.btn-yellow.toggle-reset(onclick="toggleReset();") Reset
+          div.btn.btn-yellow.toggle-all(onclick="toggleTop()") Top 200
+          div.btn.btn-yellow.toggle-reset(onclick="toggleReset()") Reset
+          select#sort.btn.btn-yellow(onchange="updateInformation(displayList)")
       hr.seperator(style="margin-bottom: 0;")
       div.container-fluid  
         ul#filter.no-margin.no-padding
