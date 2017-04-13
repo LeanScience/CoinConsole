@@ -306,7 +306,6 @@ a:hover {
 .information-item div * {
   padding: 0 5px;
   min-width: 20%;
-  text-align: center;
 }
 
 .information-item {
@@ -321,17 +320,10 @@ a:hover {
   min-width: 300px;
 }
 
-.name {
-  text-align: left !important;
-}
-
 .percent-changes {
-  flex-flow: row nowrap !important;
   padding: 10px 20px !important;
   background-color: #222;
-  border-radius: 30px;
-  width: initial !important;
-  min-width: 30%;
+  max-width: 315px;
 }
 
 .positive {
@@ -340,12 +332,6 @@ a:hover {
 
 .negative {
   color: #ef5350;
-}
-
-@media screen and (min-width: 1080px) {
-  .information-item div * {
-      min-width: 15%;
-  }
 }
 
 @media screen and (min-width: 768px){
@@ -380,10 +366,6 @@ a:hover {
 
 @media screen and (max-width: 768px) {
   .hidden-mobile {
-    display: none;
-  }
-
-  .branding {
     display: none;
   }
 
