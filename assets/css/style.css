@@ -2,11 +2,13 @@
 @import url(/assets/css/fonts.css);
 
 body {
+  font-weight: 100;
   font-family: 'Open Sans', sans-serif;
   padding: 0;
   margin: 0;
   color: #111;
   font-weight: 300;
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -34,7 +36,7 @@ a:hover {
   bottom: 15px;
   right: 4%;
   position: absolute;
-  z-index: 200;
+  z-index: 125;
 }
 
 .inline {
@@ -142,7 +144,7 @@ a:hover {
   width: 100%;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 10px 0;
+  margin: 20px 0 10px 0;
 }
 
 .seperator-dark {
@@ -178,7 +180,7 @@ a:hover {
   background-color: white;
   color: #222;
   /*flex: 1 1 0%;*/
-  height: calc(100vh - 86px - 112px);
+  height: calc(100vh - 86px - 109px);
   width: 100%;
 }
 
@@ -201,12 +203,15 @@ a:hover {
 }
 
 #sort {
-  font-size: 14px;
+  font-weight: 100;
+  font-size: 16px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   outline: none;
-  text-align: center;
+  text-align: left;
+  padding: 10px;
+  width: 100%;
 }
 
 #sort:active {
@@ -224,7 +229,7 @@ a:hover {
 }
 
 .toggle-buttons {
-  margin: -10px 0;
+  margin: -3px 0 -10px 0;
 }
 
 .active {
@@ -455,4 +460,81 @@ a:hover {
 
 #footer a:hover {
   color: #ffb300;
+}
+
+/* CALCULATOR */
+#calculator-toggle {
+  height: 10px;
+  cursor: pointer;
+}
+
+#calculator-toggle, .keys {
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
+}
+
+#calculator {
+  position: absolute;
+  background: #174da0;
+  z-index: 150;
+  width: 350px;
+  height: 350px;
+  bottom: -340px;
+  right: 0;
+}
+
+.top {
+  background: rgba(255, 255, 255, 0.05);
+  height: 100px;
+}
+
+.top, .keys {
+  color: white;
+}
+.top .input {
+  height: 3em;
+  flex-grow: 1;
+  line-height: 3em;
+  text-align: right;
+  letter-spacing: 1px;
+  overflow-x: hidden;
+  padding-right: 30px;
+}
+
+.keys {
+  height: calc(100% - 112px);
+}
+
+.keys, .keys span, .top, .top span.clear {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.keys span, .top span.clear {
+  cursor: pointer;
+  width: 25%;
+  height: 100%;
+  transition: .2s;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.keys span {
+  height: 25%;
+}
+
+.keys span:hover, .top span.clear:hover {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 2px 5px, rgba(0, 0, 0, 0.227451) 0px 2px 5px;
+}
+
+.keys span.operator, .keys span.equals, .top span.clear {
+  background: rgba(0, 0, 0, 0.15);
 }
