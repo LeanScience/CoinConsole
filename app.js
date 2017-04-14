@@ -38,14 +38,26 @@ var globalData,
     userRefreshRate = 7.5; //number of seconds before data updates are sent to the client
 
 //listen for websocket connections
-websock.on('connection', function(socket){
+websock.on('connection', onConnect);
 
+function onConnect(socket){
+  var badAttempt = 0,
+      messageAttempt = 0,
+      banned = false,
+
+      clearMessageAttemptTimer = 10; //number of seconds before the message count is reset
+
+  var messageAttemptTimer = setInterval(function(){
+    messageAttempt = 0;
+  }, clearMessageAttemptTimer * 1000);
+
+  socket.join('trollbox');
   //send initial data
   socket.emit('refreshTicker', tickerData);
   socket.emit('refreshGlobal', globalData);
 
   //ping the client to initiate the page
-  socket.emit('init', globalData);
+  socket.emit('init', tickerData);
 
   //refresh the data every 'userRefreshRate' seconds
   var userRefreshTimer = setInterval(function() {
@@ -53,12 +65,53 @@ websock.on('connection', function(socket){
     socket.emit('refreshGlobal', globalData);
   }, userRefreshRate * 1000);
 
-  socket.on('disconnect', function () {
+  socket.on('trollbox', function(data){
+    if (! socket.nickname){
+      ((data.name) ? socket.nickname = data.name : socket.nickname = "Anonymous");
+    }
+
+    if (data.message.length < 200 && messageAttempt < 10 && ! banned){
+      messageAttempt += 1;
+      filterBadWords(data.message).then(function(filteredMessage){
+        data.message = filteredMessage;
+        websock.to('trollbox').emit('trollbox', {"message": data.message, "name": socket.nickname});
+      });
+    } else {
+      socket.emit('trollbox', {"name": "CoinConsole", "message": "Nice try. Keep the trolling short and sweet."});
+      badAttempt += 1;
+      checkBadAttempts();
+    }
+  });
+
+  socket.on('disconnect', function() {
     //Destroy the refresh timer for this user
     clearInterval(userRefreshTimer);
+    clearInterval(messageAttemptTimer);
     userRefreshTimer = null;
+    messageAttemptTimer = null;
   });
-});
+
+  function filterBadWords(s){
+    return new Promise(function(resolve, reject){
+      var badWords = ["fuck", "bastard", "cum", "cunt", "cock", "ass", "shit", "bitch"],
+          rgx = new RegExp(badWords.join("|"), "gi");
+
+      resolve(s.replace(rgx, "****"));
+    });
+  }
+
+  function checkBadAttempts(){
+    if (badAttempt >= 10) {
+      socket.emit('trollbox', {"name": "CoinConsole", "message": "You've been banned from the trollbox."});
+      ban();
+    }
+  }
+
+  function ban(){
+    socket.leave('trollbox');
+    banned = true;
+  }
+}
 
 function getTickerData() {
   let cmcGET = new Promise(function(resolve, reject) {

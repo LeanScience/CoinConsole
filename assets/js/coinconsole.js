@@ -33,12 +33,18 @@ socket.on('init', function(){
     sort.innerHTML = '';
     var html = '',
         info = Object.keys(o[0]),
-        asyncLoop = 0;
+        asyncLoop = 0,
+        sortDefault = 'rank';
 
     for (var option in info){
       asyncLoop += 1;
-      var html = html + '<option value="' + info[option] + '">' + info[option] + '</option>';
-      ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+      if (info[option].toString().toLowerCase() === sortDefault) {
+        var html = html + '<option selected="selected" value="' + info[option] + '">' + info[option] + '</option>';
+        ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+      } else {
+        var html = html + '<option value="' + info[option] + '">' + info[option] + '</option>';
+        ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+      }
     }
   }
 });
@@ -76,6 +82,18 @@ socket.on('refreshTicker', function(data){
 
   updateInformation(displayList);
 });
+
+socket.on('trollbox', function(data){
+  console.log(data.name + ": " + data.message);
+});
+
+function sendChat(message, nickname){
+  if (message.length < 200){
+    socket.emit('trollbox', {"name": nickname, "message": message});
+  } else {
+    console.log("Your message was too long! Please keep it under 200 characters.");
+  }
+}
 
 //set up a function to create the filter list
 function createFilterList(a){
@@ -273,7 +291,6 @@ function updateInformation(a){
         createInformationListHTML(a[coin]).then(function(informationListHTML){
           html = html + informationListHTML;
           ((asyncLoop == a.length) ? displayInformationList(html) : asyncLoop);
-          console.log(html);
         });
       }
     }
