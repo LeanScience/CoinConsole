@@ -78,6 +78,7 @@ a:hover {
 
 .btn {
   background-color: white;
+  border: 0;
   border-radius: 20px;
   color: #111;
   width: auto;
@@ -98,7 +99,7 @@ a:hover {
 }
 
 .btn:hover {
-  background-color: #e64a19;
+  background-color: #ccc;
   color: #555;
   border-color: #555;
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 3px 10px, rgba(0, 0, 0, 0.227451) 0px 3px 10px;
@@ -197,6 +198,19 @@ a:hover {
 
 #filter {
   flex-flow: row wrap;
+}
+
+#sort {
+  font-size: 14px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  text-align: center;
+}
+
+#sort:active {
+  outline: none;
 }
 
 #filterbar .btn {
