@@ -1,0 +1,24 @@
+#calculator.hidden-mobile
+  div#calculator-toggle(onclick="toggleCalculator()")
+  div.top
+    span.key.clear(data-value='C') C
+    div.input
+    div.result
+  div.keys
+    span.key(data-value='7') 7
+    span.key(data-value='8') 8
+    span.key(data-value='9') 9
+    span.key.operator(data-value='/') /
+    span.key(data-value='4') 4
+    span.key(data-value='5') 5
+    span.key(data-value='6') 6
+    span.key.operator(data-value='*') x
+    span.key(data-value='1') 1
+    span.key(data-value='2') 2
+    span.key(data-value='3') 3
+    span.key.operator(data-value='-') -
+    span.key(data-value='0') 0
+    span.key(data-value='.') .
+    span.key.equals(data-value='=') =
+    span.key.operator(data-value='+') +
+script(src='http://thecodeplayer.com/uploads/js/prefixfree-1.0.7.js', type='text/javascript')

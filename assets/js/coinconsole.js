@@ -1,34 +1,16 @@
 "use strict";
 
-var QueryString = function() {
- // This function is anonymous, is executed immediately and
- // the return value is assigned to QueryString!
- var query_string = {};
- //window.location.search for "?x=y" url params -- this requires us to refresh the page when changed, though
- var query = window.location.hash.substring(1);
- var vars = query.split("&");
- for (var i=0;i<vars.length;i++) {
-   var pair = vars[i].split("=");
-       // If first entry with this name
-   if (typeof query_string[pair[0]] === "undefined") {
-     query_string[pair[0]] = decodeURIComponent(pair[1]);
-       // If second entry with this name
-   } else if (typeof query_string[pair[0]] === "string") {
-     var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
-     query_string[pair[0]] = arr;
-       // If third or later entry with this name
-   } else {
-     query_string[pair[0]].push(decodeURIComponent(pair[1]));
-   }
- }
- return query_string;
-}();
+//Check whether or not the client is in mobile and adjust the filter-toggle icon based on the width of the device
+window.onresize = checkToggleFilterPosition;
+
+var QueryString = getUrlParams();
 
 var websocketPort = 3004;
 
 var information = document.getElementById('information'),
     filterbar = document.getElementById('filterbar'),
     filter = document.getElementById('filter'),
+    sort = document.getElementById('sort'),
 
     numberOfCurrencies = document.getElementById('total-currencies'),
     totalMarketCap = document.getElementById('total-market-cap'),
@@ -45,6 +27,26 @@ var socket = io.connect('//' + window.location.hostname + ':' + websocketPort),
 //initiate the page
 socket.on('init', function(){
   createFilterList(tickerData); //create the new list of coins for the filter
+  createSortList(tickerData);
+
+  function createSortList(o){
+    sort.innerHTML = '';
+    var html = '',
+        info = Object.keys(o[0]),
+        asyncLoop = 0,
+        sortDefault = 'rank';
+
+    for (var option in info){
+      asyncLoop += 1;
+      if (info[option].toString().toLowerCase() === sortDefault) {
+        var html = html + '<option selected="selected" value="' + info[option] + '">' + info[option] + '</option>';
+        ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+      } else {
+        var html = html + '<option value="' + info[option] + '">' + info[option] + '</option>';
+        ((asyncLoop === info.length) ? sort.innerHTML = html : html);
+      }
+    }
+  }
 });
 
 //listen for refreshed data
@@ -52,42 +54,63 @@ socket.on('refreshGlobal', function(data){
   globalData = JSON.parse(data);
 
   updateGlobal(globalData);
+
+  function updateGlobal(o){
+    numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
+    totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
+    totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
+    bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
+  }
 });
 
 socket.on('refreshTicker', function(data){
   tickerData = JSON.parse(data);
 
+  convertTickerData();
+
+  function convertTickerData() {
+    for (var ticker in tickerData) {
+      if (typeof tickerData[ticker] === "object") {
+        for (var key in tickerData[ticker]) {
+          if (! isNaN(parseFloat(tickerData[ticker][key]))) {
+            tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
+          }
+        }
+      }
+    }
+  }
+
   updateInformation(displayList);
 });
 
-function updateGlobal(o){
-  numberOfCurrencies.innerHTML = o.active_currencies + " Active Currencies";
-  totalMarketCap.innerHTML = "$" + o.total_market_cap_usd.formatMoney(0, ".", ",") + " Market Cap";
-  totalTradeVolume.innerHTML = "$" + o.total_24h_volume_usd.formatMoney(0, ".", ",") + " Trade Volume";
-  bitcoinDominance.innerHTML = o.bitcoin_percentage_of_market_cap + "% Bitcoin Dominance";
+socket.on('trollbox', function(data){
+  console.log(data.name + ": " + data.message);
+});
+
+function sendChat(message, nickname){
+  if (message.length < 200){
+    socket.emit('trollbox', {"name": nickname, "message": message});
+  } else {
+    console.log("Your message was too long! Please keep it under 200 characters.");
+  }
 }
 
 //set up a function to create the filter list
 function createFilterList(a){
   filter.innerHTML = '';
-
-  var result = new Promise(function(resolve, reject){
-    var html = '';
-    for (var coin in a) {
-      if (a[coin].symbol) {
-        var coinName = a[coin].symbol;
-        html = html + createFilterItem(coinName);
-      }
+  var html = '',
+      asyncLoop = 0;
+  for (var coin in a) {
+    if (a[coin].symbol) {
+      asyncLoop += 1;
+      var coinName = a[coin].symbol;
+      html = html + createFilterItem(coinName);
+      ((asyncLoop === a.length) ? filter.innerHTML = html : html);
     }
-    resolve(html);
-  });
+  }
 
-  result.then(function(filterList){
-    filter.innerHTML = filterList;
-
-    //check for active coins and style them
-    //this is a future issue
-  });
+  //check for active coins and style them
+  //this is a future issue
 }
 
 function activeCheck(s){
@@ -118,6 +141,218 @@ function clearSearch(e){
     document.getElementById(e).value = '';
     createFilterList(tickerData);
   }
+}
+
+//make a filter checkbox
+function createFilterItem(s){
+  var result = '<li class="no-margin no-dot btn btn-blue" onClick="toggleCoin(this.innerHTML.toLowerCase())">' + s + '</li>';
+
+  return result;
+}
+
+//toggle the filter list
+var untoggled = false; //default is toggled
+
+toggleFilter();
+
+function toggleFilter() {
+  if (untoggled == false) {
+    //show the filter
+    filterbar.style.display = "flex";
+    untoggled = true;
+    document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
+    checkToggleFilterPosition();
+  } else if (untoggled == true) {
+    //hide the filter
+    filterbar.style.display = "none";
+    untoggled = false;
+    document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
+    checkToggleFilterPosition();
+  }
+}
+
+function checkToggleFilterPosition() {
+  var filterToggleIcon = document.getElementById('filter-toggle-icon');
+
+  if (window.innerWidth <= 768) {
+    if (filterToggleIcon.className === "fa fa-angle-right") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-down";
+    } else if (filterToggleIcon.className === "fa fa-angle-left") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-up";
+    }
+  } else {
+    if (filterToggleIcon.className === "fa fa-angle-up") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
+    } else if (filterToggleIcon.className === "fa fa-angle-down") {
+      document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
+    }
+  }
+}
+
+//toggle coin data on and off
+var displayList;
+getUrlDisplayList(); //grab the coins from the url bar
+
+function getUrlDisplayList() {
+  if (QueryString.display) {
+    displayList = QueryString.display.toLowerCase().split(",");
+  } else {
+    displayList = [];
+  }
+}
+
+function toggleTop(){
+  toggleReset();
+  searchArray(tickerData, 200, "rank", true)
+  .then(function(topTwoHundredData){
+    for (var coin in topTwoHundredData) {
+      if (topTwoHundredData[coin].symbol) {
+        displayList.push(topTwoHundredData[coin].symbol);
+      }
+    }
+  }).then(function(){
+    updateInformation(displayList);
+    window.location.search = window.location.search;
+  });
+}
+
+function toggleReset(){
+  displayList = [];
+  updateInformation(displayList);
+}
+
+function toggleCoin(coin){
+  //check if the coin is currently on the display
+  searchArray(displayList, coin).then(function(result){
+    if (result == false) {
+      //if it's not, add it and rerender
+      displayList.push(coin);
+      updateInformation(displayList);
+    } else {
+      //if it is, remove it and rerender
+      var index = displayList.indexOf(coin);
+      displayList.splice(index, 1);
+      updateInformation(displayList);
+    }
+  });
+}
+
+var reverseSort = false;
+
+function toggleReverse() {
+  ((reverseSort) ? reverseSort = false : reverseSort = true);
+  updateInformation(displayList);
+}
+
+function updateURL(a){
+  if (a && a.length && a.length > 0) {
+    //create the new string
+    var newParams = a.toString().toLowerCase();
+    //put it up in the URL bar
+    window.history.replaceState(newParams, newParams, "/#display=" + newParams);
+  } else {
+    //if there aren't any coins being displayed, the url should be set to root
+    window.history.replaceState("", "initial page", "/");
+  }
+}
+
+function updateInformation(a){
+  updateURL(a);
+
+  if (a.length && a.length != 0){
+    selectInformationList()
+    .then(function(informationList){
+      sortInformationList(informationList);
+      renderInformationList(informationList);
+    });
+  } else {
+    information.innerHTML = welcomeMessage;
+  }
+
+  function selectInformationList(){
+    return new Promise(function(resolve, reject){
+      var asyncLoop = 0,
+          coinInfoList = [];
+
+      for (var coin in a) {
+        asyncLoop += 1;
+        selectCoinInfo(a[coin]).then(function(coinInfo){
+          coinInfoList.push(coinInfo);
+        });
+        ((asyncLoop == a.length) ? resolve(coinInfoList) : asyncLoop);
+      }
+    });
+  }
+
+  function sortInformationList(a){
+    ((sort.value) ? a.sortOn(sort.value) : sort.value);
+    ((reverseSort) ? a.reverse() : reverseSort);
+  }
+
+  function renderInformationList(a){
+    var html = '',
+        asyncLoop = 0;
+
+    for (var coin in a) {
+      if (typeof a[coin] == "object") {
+        asyncLoop += 1;
+        createInformationListHTML(a[coin]).then(function(informationListHTML){
+          html = html + informationListHTML;
+          ((asyncLoop == a.length) ? displayInformationList(html) : asyncLoop);
+        });
+      }
+    }
+  }
+
+  function displayInformationList(h) {
+    information.innerHTML = h;
+  }
+}
+
+function selectCoinInfo(coin) {
+  return new Promise(function(resolve, reject){
+    for (var index in tickerData) {
+      if (tickerData[index].symbol && tickerData[index].symbol !== "undefined" && typeof tickerData[index].symbol === 'string' && tickerData[index].symbol.toLowerCase() === coin){
+        resolve(tickerData[index]);
+        break;
+      }
+    }
+  });
+}
+
+function createInformationListHTML(o){
+  return new Promise(function(resolve, reject){
+    if (o.name) {
+      var title = o.name,
+          priceUsd = parseFloat(o.price_usd),
+          priceUsd = ((priceUsd > 1) ? priceUsd.formatMoney(2, ".", ",") : priceUsd = priceUsd.formatMoney(8, ".", ",")),
+          priceBtc = parseFloat(o.price_btc).toFixed(8),
+          volume = parseFloat(o["24h_volume_usd"]).formatMoney(0, ".", ","),
+          marketCap = parseFloat(o.market_cap_usd).formatMoney(0, ".", ","),
+          oneHour = parseFloat(o["percent_change_1h"]),
+          twentyFourHour = parseFloat(o["percent_change_24h"]),
+          sevenDay = parseFloat(o["percent_change_7d"]),
+          rank = parseInt(o.rank);
+
+      var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>'),
+          twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>'),
+          sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
+
+      var titleHTML = '<h3 class="no-margin">' + title + '<small class="rank"> #' + rank + '</small>' + '</h3>',
+          priceUsdHTML = '<h4 class="no-margin">USD: $' + priceUsd + '</h4>',
+          priceBtcHTML = '<h4 class="no-margin">BTC: ' + priceBtc + '</h4>',
+          volumeHTML = '<h4 class="no-margin">Volume: $' + volume + '</h4>',
+          marketCapHTML = '<h4 class="no-margin">Market Cap: $' + marketCap + '</h4>',
+          result = '<li class="inline information-item"><div id=' + title + '">' + titleHTML + priceUsdHTML + priceBtcHTML + volumeHTML + marketCapHTML + '<div class="percent-changes no-padding">' + oneHourChangeHTML + twentyFourHourChangeHTML + sevenDayChangeHTML + '</div>' + '</div></li>';
+
+      resolve(result);
+    }
+  });
+}
+
+function shareLink(){
+  //future button function to share a link to that specific coinconsole
+  //maybe some url shortening could be added to this function to make it... well... shorter
 }
 
 function searchArray(a, t, k, lt){
@@ -158,186 +393,27 @@ function searchArray(a, t, k, lt){
   });
 }
 
-//make a filter checkbox
-function createFilterItem(s){
-  var result = '<li class="no-margin no-dot btn btn-blue" onClick="toggleCoin(this.innerHTML.toLowerCase())">' + s + '</li>';
-
-  return result;
-}
-
-//toggle the filter list
-var toggled = false; //default is toggled
-
-toggleFilter();
-
-function toggleFilter() {
-  if (toggled == false) {
-    //show the filter
-    filterbar.style.display = "flex";
-    toggled = true;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    checkToggleFilterPosition();
-  } else if (toggled == true) {
-    //hide the filter
-    filterbar.style.display = "none";
-    toggled = false;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    checkToggleFilterPosition();
-  }
-}
-
-function checkToggleFilterPosition() {
-  var filterToggleIcon = document.getElementById('filter-toggle-icon');
-
-  if (window.innerWidth <= 768) {
-    if (filterToggleIcon.className === "fa fa-angle-right") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-down";
-    } else if (filterToggleIcon.className === "fa fa-angle-left") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-up";
-    }
-  } else {
-    if (filterToggleIcon.className === "fa fa-angle-up") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    } else if (filterToggleIcon.className === "fa fa-angle-down") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    }
-  }
-}
-
-window.onresize = checkToggleFilterPosition;
-
-//toggle coin data on and off
-var displayList;
-
-function getUrlDisplayList() {
-  if (QueryString.display) {
-    displayList = QueryString.display.toLowerCase().split(",");
-  } else {
-    displayList = [];
-  }
-}
-
-getUrlDisplayList();
-
-function toggleTop(){
-  toggleReset();
-  searchArray(tickerData, 200, "rank", true)
-  .then(function(topTwoHundredData){
-    for (var coin in topTwoHundredData) {
-      if (topTwoHundredData[coin].symbol) {
-        displayList.push(topTwoHundredData[coin].symbol);
-      }
-    }
-  }).then(function(){
-    updateInformation(displayList);
-    window.location.search = window.location.search;
-  });
-}
-
-function toggleReset(){
-  displayList = [];
-  updateInformation(displayList);
-}
-
-function toggleCoin(coin){
-  //check if the coin is currently on the display
-  searchArray(displayList, coin).then(function(result){
-    if (result == false) {
-      //if it's not, add it and rerender
-      displayList.push(coin);
-      updateInformation(displayList);
-    } else {
-      //if it is, remove it and rerender
-      var index = displayList.indexOf(coin);
-      displayList.splice(index, 1);
-      updateInformation(displayList);
-    }
-  });
-}
-
-function updateURL(a){
-  if (a && a.length && a.length > 0) {
-    //create the new string
-    var newParams = a.toString().toLowerCase();
-    //put it up in the URL bar
-    window.history.replaceState(newParams, newParams, "/#display=" + newParams);
-  } else {
-    //if there aren't any coins being displayed, the url should be set to root
-    window.history.replaceState("", "initial page", "/");
-  }
-}
-
-function updateInformation(a){
-  updateURL(a);
-
-  if (a.length != 0){
-    var result = new Promise(function(resolve, reject){
-      var html = '',
-      asyncLoop = 0;
-      for (var coin in a) {
-        selectCoinInfo(a[coin]).then(function(coinInfo){
-          createInformationList(coinInfo).then(function(informationList){
-            asyncLoop += 1;
-            html = html + informationList;
-            if (asyncLoop == a.length) resolve(html);
-          });
-        });
-      }
-    });
-
-    result.then(function(informationList){
-      information.innerHTML = informationList;
-    });
-  } else {
-    information.innerHTML = welcomeMessage;
-  }
-}
-
-function selectCoinInfo(coin) {
-  return new Promise(function(resolve, reject){
-    for (var index in tickerData) {
-      if (tickerData[index].symbol && tickerData[index].symbol !== "undefined" && typeof tickerData[index].symbol === 'string' && tickerData[index].symbol.toLowerCase() === coin){
-        resolve(tickerData[index]);
-        break;
-      }
-    }
-  });
-}
-
-function createInformationList(o){
-  return new Promise(function(resolve, reject){
-    if (o.name) {
-      var title = o.name,
-          priceUsd = parseFloat(o.price_usd),
-          priceUsd = ((priceUsd > 1) ? priceUsd.formatMoney(2, ".", ",") : priceUsd = priceUsd.formatMoney(8, ".", ",")),
-          priceBtc = parseFloat(o.price_btc).toFixed(8),
-          volume = parseFloat(o["24h_volume_usd"]).formatMoney(0, ".", ","),
-          marketCap = parseFloat(o.market_cap_usd).formatMoney(0, ".", ","),
-          oneHour = parseFloat(o["percent_change_1h"]),
-          twentyFourHour = parseFloat(o["percent_change_24h"]),
-          sevenDay = parseFloat(o["percent_change_7d"]),
-          rank = parseInt(o.rank);
-
-      var oneHourChangeHTML = ((oneHour < 0) ? '<h4 class="no-margin one-hour negative">1H: ' + oneHour + "%</h4>" : '<h4 class="no-margin one-hour positive">1H: ' + oneHour + '%</h4>'),
-          twentyFourHourChangeHTML = ((twentyFourHour < 0) ? '<h4 class="no-margin twenty-four-hour negative" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>' : '<h4 class="no-margin twenty-four-hour positive" style="padding: 0 7px;">24H: ' + twentyFourHour + '%</h4>'),
-          sevenDayChangeHTML = ((sevenDay < 0) ? '<h4 class="no-margin seven-day negative">7D: ' + sevenDay + '%</h4></div>' : "<h4 class='no-margin seven-day positive'>7D: " + sevenDay + '%</h4>');
-
-      var titleHTML = '<h3 class="no-margin">' + title + '<small class="rank"> #' + rank + '</small>' + '</h3>',
-          priceUsdHTML = '<h4 class="no-margin">USD: $' + priceUsd + '</h4>',
-          priceBtcHTML = '<h4 class="no-margin">BTC: ' + priceBtc + '</h4>',
-          volumeHTML = '<h4 class="no-margin">Volume: $' + volume + '</h4>',
-          marketCapHTML = '<h4 class="no-margin">Market Cap: $' + marketCap + '</h4>',
-          result = '<li class="inline information-item"><div id=' + title + '">' + titleHTML + priceUsdHTML + priceBtcHTML + volumeHTML + marketCapHTML + '<div class="percent-changes no-padding">' + oneHourChangeHTML + twentyFourHourChangeHTML + sevenDayChangeHTML + '</div>' + '</div></li>';
-
-      resolve(result);
-    }
-  });
-}
-
-function shareLink(){
-  //future button function to share a link to that specific coinconsole
-  //maybe some url shortening could be added to this function to make it... well... shorter
-}
+function getUrlParams() {
+ var query_string = {};
+ //window.location.search for "?x=y" url params -- this requires us to refresh the page when changed, though
+ var query = window.location.hash.substring(1);
+ var vars = query.split("&");
+ for (var i=0;i<vars.length;i++) {
+   var pair = vars[i].split("=");
+       // If first entry with this name
+   if (typeof query_string[pair[0]] === "undefined") {
+     query_string[pair[0]] = decodeURIComponent(pair[1]);
+       // If second entry with this name
+   } else if (typeof query_string[pair[0]] === "string") {
+     var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+     query_string[pair[0]] = arr;
+       // If third or later entry with this name
+   } else {
+     query_string[pair[0]].push(decodeURIComponent(pair[1]));
+   }
+ }
+ return query_string;
+};
 
 Number.prototype.formatMoney = function(c, d, t){
   var n = this,
@@ -357,4 +433,15 @@ Array.prototype.unique = function() {
         }
         return accum;
     }, []);
+}
+
+Array.prototype.sortOn = function(key){
+  this.sort(function(a, b){
+      if(a[key] < b[key]){
+          return -1;
+      }else if(a[key] > b[key]){
+          return 1;
+      }
+      return 0;
+  });
 }

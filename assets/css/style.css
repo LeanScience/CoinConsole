@@ -2,11 +2,13 @@
 @import url(/assets/css/fonts.css);
 
 body {
+  font-weight: 100;
   font-family: 'Open Sans', sans-serif;
   padding: 0;
   margin: 0;
   color: #111;
   font-weight: 300;
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -34,7 +36,7 @@ a:hover {
   bottom: 15px;
   right: 4%;
   position: absolute;
-  z-index: 200;
+  z-index: 125;
 }
 
 .inline {
@@ -78,6 +80,7 @@ a:hover {
 
 .btn {
   background-color: white;
+  border: 0;
   border-radius: 20px;
   color: #111;
   width: auto;
@@ -95,10 +98,11 @@ a:hover {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  overflow: hidden;
 }
 
 .btn:hover {
-  background-color: #e64a19;
+  background-color: #ccc;
   color: #555;
   border-color: #555;
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 3px 10px, rgba(0, 0, 0, 0.227451) 0px 3px 10px;
@@ -141,7 +145,7 @@ a:hover {
   width: 100%;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 10px 0;
+  margin: 20px 0 10px 0;
 }
 
 .seperator-dark {
@@ -177,7 +181,7 @@ a:hover {
   background-color: white;
   color: #222;
   /*flex: 1 1 0%;*/
-  height: calc(100vh - 86px - 112px);
+  height: calc(100vh - 86px - 109px);
   width: 100%;
 }
 
@@ -199,6 +203,22 @@ a:hover {
   flex-flow: row wrap;
 }
 
+#sort {
+  font-weight: 100;
+  font-size: 16px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  text-align: left;
+  padding: 10px;
+  width: 94%;
+}
+
+#sort:active {
+  outline: none;
+}
+
 #filterbar .btn {
   margin: 10px;
   margin-left: 0;
@@ -210,7 +230,7 @@ a:hover {
 }
 
 .toggle-buttons {
-  margin: -10px 0;
+  margin: -3px 0 -10px 0;
 }
 
 .active {
@@ -306,7 +326,6 @@ a:hover {
 .information-item div * {
   padding: 0 5px;
   min-width: 20%;
-  text-align: center;
 }
 
 .information-item {
@@ -321,17 +340,10 @@ a:hover {
   min-width: 300px;
 }
 
-.name {
-  text-align: left !important;
-}
-
 .percent-changes {
-  flex-flow: row nowrap !important;
   padding: 10px 20px !important;
   background-color: #222;
-  border-radius: 30px;
-  width: initial !important;
-  min-width: 30%;
+  max-width: 315px;
 }
 
 .positive {
@@ -340,12 +352,6 @@ a:hover {
 
 .negative {
   color: #ef5350;
-}
-
-@media screen and (min-width: 1080px) {
-  .information-item div * {
-      min-width: 15%;
-  }
 }
 
 @media screen and (min-width: 768px){
@@ -383,17 +389,13 @@ a:hover {
     display: none;
   }
 
-  .branding {
-    display: none;
-  }
-
   .filterbar-toggle {
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
     text-align: center;
-    width: calc(100% - 25px);
+    width: calc(100% - 10px);
     background-color: #2265b1;
     padding: 0 5px;
     color: white;
@@ -459,4 +461,103 @@ a:hover {
 
 #footer a:hover {
   color: #ffb300;
+}
+
+/* CALCULATOR */
+#calculator-toggle {
+  height: 10px;
+  cursor: pointer;
+}
+
+#calculator-toggle, .keys {
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
+}
+
+#calculator {
+  position: absolute;
+  background: #174da0;
+  z-index: 150;
+  width: 350px;
+  height: 350px;
+  bottom: -340px;
+  right: 0;
+  transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -moz-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -webkit-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+}
+
+.top {
+  background: #3392de;
+  height: 85px;
+}
+
+.top, .keys {
+  color: white;
+}
+.top .input {
+  height: 3em;
+  flex-grow: 1;
+  line-height: 3em;
+  text-align: right;
+  letter-spacing: 1px;
+  overflow-x: hidden;
+  padding-right: 30px;
+}
+
+.key {
+  overflow: hidden;
+}
+
+.keys {
+  height: calc(100% - 97px);
+}
+
+.keys, .keys span, .top, .top span.clear {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.keys span, .top span.clear {
+  cursor: pointer;
+  width: 25%;
+  height: 100%;
+  transition: .2s;
+  -webkit-transition: .2s;
+  -moz-transition: .2s;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.keys span {
+  height: 25%;
+}
+
+.keys span:hover, .top span.clear:hover {
+  background: #53b6f7;
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 2px 5px, rgba(0, 0, 0, 0.227451) 0px 2px 5px;
+}
+
+.keys span.operator, .keys span.equals, .top span.clear {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.material-wave {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940), opacity 0.3s 0.4s;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 0;
 }

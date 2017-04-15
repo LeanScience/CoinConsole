@@ -2,8 +2,9 @@ extends templates/page
 
 block content
   div.branding
-    img(src="/assets/img/logo_main.png" style="width: 100%" onclick="shareLink()")
+    img(src="/assets/img/logo_main_xs.png" style="width: 100%" onclick="shareLink()")
   div.share
+  include templates/partials/calculator
   main#main
     div#filterbar
       div.container-fluid
@@ -11,8 +12,10 @@ block content
           input#filter-search.transition(type="text" placeholder="Search..." onkeyup="filterSearch(this.value);")
           i.search-clear.fa.fa-times-circle.transition(onclick="clearSearch('filter-search');")
         div.toggle-buttons
-          div.btn.btn-yellow.toggle-all(onclick="toggleTop();") Top 200
-          div.btn.btn-yellow.toggle-reset(onclick="toggleReset();") Reset
+          div.btn.btn-yellow.toggle-all(onclick="toggleTop()") Top 200
+          div.btn.btn-yellow.toggle-reset(onclick="toggleReset()") Reset
+          div.btn.btn-yellow.toggle-reverse(onclick="toggleReverse()") Reverse
+          select#sort.btn.btn-blue(onchange="updateInformation(displayList)")
       hr.seperator(style="margin-bottom: 0;")
       div.container-fluid  
         ul#filter.no-margin.no-padding
