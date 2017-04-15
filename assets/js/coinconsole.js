@@ -237,6 +237,13 @@ function toggleCoin(coin){
   });
 }
 
+var reverseSort = false;
+
+function toggleReverse() {
+  ((reverseSort) ? reverseSort = false : reverseSort = true);
+  updateInformation(displayList);
+}
+
 function updateURL(a){
   if (a && a.length && a.length > 0) {
     //create the new string
@@ -279,6 +286,7 @@ function updateInformation(a){
 
   function sortInformationList(a){
     ((sort.value) ? a.sortOn(sort.value) : sort.value);
+    ((reverseSort) ? a.reverse() : reverseSort);
   }
 
   function renderInformationList(a){

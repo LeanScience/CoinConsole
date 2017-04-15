@@ -14,7 +14,8 @@ block content
         div.toggle-buttons
           div.btn.btn-yellow.toggle-all(onclick="toggleTop()") Top 200
           div.btn.btn-yellow.toggle-reset(onclick="toggleReset()") Reset
-          select#sort.btn.btn-yellow(onchange="updateInformation(displayList)")
+          div.btn.btn-yellow.toggle-reverse(onclick="toggleReverse()") Reverse
+          select#sort.btn.btn-blue(onchange="updateInformation(displayList)")
       hr.seperator(style="margin-bottom: 0;")
       div.container-fluid  
         ul#filter.no-margin.no-padding
