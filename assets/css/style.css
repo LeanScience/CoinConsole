@@ -98,6 +98,7 @@ a:hover {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  overflow: hidden;
 }
 
 .btn:hover {
@@ -211,7 +212,7 @@ a:hover {
   outline: none;
   text-align: left;
   padding: 10px;
-  width: 100%;
+  width: 94%;
 }
 
 #sort:active {
@@ -480,11 +481,14 @@ a:hover {
   height: 350px;
   bottom: -340px;
   right: 0;
+  transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -moz-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -webkit-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
 }
 
 .top {
-  background: rgba(255, 255, 255, 0.05);
-  height: 100px;
+  background: #3392de;
+  height: 85px;
 }
 
 .top, .keys {
@@ -500,8 +504,12 @@ a:hover {
   padding-right: 30px;
 }
 
+.key {
+  overflow: hidden;
+}
+
 .keys {
-  height: calc(100% - 112px);
+  height: calc(100% - 97px);
 }
 
 .keys, .keys span, .top, .top span.clear {
@@ -531,10 +539,25 @@ a:hover {
 }
 
 .keys span:hover, .top span.clear:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: #53b6f7;
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 2px 5px, rgba(0, 0, 0, 0.227451) 0px 2px 5px;
 }
 
 .keys span.operator, .keys span.equals, .top span.clear {
   background: rgba(0, 0, 0, 0.15);
+}
+
+.material-wave {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940), opacity 0.3s 0.4s;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 0;
 }

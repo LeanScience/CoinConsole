@@ -103,3 +103,34 @@ for(var i = 0; i < keys.length; i++) {
 		e.preventDefault();
 	}
 }
+
+/*var buttons = document.getElementsByClassName('key');
+
+for (var i = 0; i < buttons.length; i++) {
+  buttons[i].addEventListener('click', function(e) {
+    var wavePosX = e.offsetX,
+        wavePosY = e.offsetY,
+        button = e.target,
+        buttonWidth = button.clientWidth,
+        wave = document.createElement('span');
+
+    wave.className = 'material-wave';
+    wave.style.top = wavePosY + 'px';
+    wave.style.left = wavePosX + 'px';
+
+    // Append wave element to the button
+    e.target.appendChild(wave);
+
+    // Start scale and opacity transitions
+    setTimeout(function() {
+      wave.style.opacity = 0;
+      wave.style.transform = 'scale(' + buttonWidth / 10 + ')';
+    }, 0);
+
+    // Remove the wave element after the transition
+    // Should use Modernizr's transitionEndEventName
+    setTimeout(function() {
+      button.removeChild(wave);
+    }, 800);
+  });
+};*/
