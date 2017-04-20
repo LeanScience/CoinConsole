@@ -26,9 +26,9 @@ a:hover {
 }
 
 .transition, .btn, a {
-  transition: .2s;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
+  transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -webkit-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -moz-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
 }
 
 .branding {
@@ -99,6 +99,7 @@ a:hover {
   -ms-user-select: none;
   user-select: none;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .btn:hover {
@@ -201,6 +202,11 @@ a:hover {
 
 #filter {
   flex-flow: row wrap;
+  flex-grow: 1;
+  background-color: #174da0;
+  padding-top: 10px;
+  margin-top: 20px;
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px -2px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
 }
 
 #sort {
@@ -235,6 +241,7 @@ a:hover {
 
 .active {
   font-weight: bold;
+  background-color: #222;
 }
 
 #filter-search {
@@ -328,6 +335,13 @@ a:hover {
   min-width: 20%;
 }
 
+.information-item .information-title {
+  width: 100%;
+  background: #222;
+  padding: 3px 6px;
+  margin-bottom: 5px;
+}
+
 .information-item {
   display: flex;
   flex-flow: row nowrap;
@@ -341,17 +355,17 @@ a:hover {
 }
 
 .percent-changes {
-  padding: 10px 20px !important;
+  padding: 5px 15px !important;
   background-color: #222;
   max-width: 315px;
 }
 
 .positive {
-  color: #66bb6a;
+  color: #81d873;
 }
 
 .negative {
-  color: #ef5350;
+  color: #e56262;
 }
 
 @media screen and (min-width: 768px){
@@ -386,7 +400,7 @@ a:hover {
 
 @media screen and (max-width: 768px) {
   .hidden-mobile {
-    display: none;
+    display: none !important;
   }
 
   .filterbar-toggle {
@@ -464,16 +478,16 @@ a:hover {
 }
 
 /* CALCULATOR */
-#calculator-toggle {
+#calculator-toggle, #trollbox-toggle {
   height: 10px;
   cursor: pointer;
 }
 
-#calculator-toggle, .keys {
+#calculator-toggle, #trollbox-toggle, .keys {
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
 }
 
-#calculator {
+#calculator, #trollbox {
   position: absolute;
   background: #174da0;
   z-index: 150;
@@ -484,10 +498,11 @@ a:hover {
   transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
   -moz-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
   -webkit-transition: .4s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  box-shadow: 0px 4px 20px black;
 }
 
 .top {
-  background: #3392de;
+  background: #42a5f5;
   height: 85px;
 }
 
@@ -543,21 +558,62 @@ a:hover {
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 2px 5px, rgba(0, 0, 0, 0.227451) 0px 2px 5px;
 }
 
-.keys span.operator, .keys span.equals, .top span.clear {
+.keys span.operator, .keys span.equals {
   background: rgba(0, 0, 0, 0.15);
 }
 
-.material-wave {
-  position: absolute;
-  width: 20px;
+.top span.clear {
+  background: #3392de;
+}
+
+/* TROLLBOX */
+
+#trollbox {
+  bottom: -440px;
+  right: 350px;
+  background: #53b6f7;
+  display: flex;
+  flex-flow: column nowrap;
+  color: white;
+  height: 450px;
+  overflow: hidden;
+}
+
+#trollbox .title small {
+  font-size: 14px;
+}
+
+#trollbox .title, #trollbox .input {
+  background-color: #1565c0;
+  padding: 10px;
+}
+
+#trollbox .chat {
+  flex-grow: 1;
+  max-height: 285px;
+  padding: 10px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background: #222;
+}
+
+#trollbox .input {
   height: 20px;
-  margin-top: -10px;
-  margin-left: -10px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: scale(0);
-  transition: transform 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940), opacity 0.3s 0.4s;
-  pointer-events: none;
-  will-change: transform, opacity;
-  z-index: 0;
+  font-size: 16px;
+  padding: 12px;
+  padding-right: 0px;
+  color: white;
+  border: none;
+  outline: none;
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
+}
+
+#trollbox .input:active {
+  outline: none;
+}
+
+#trollbox .submit {
+  border-radius: 0;
+  box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
+
 }
