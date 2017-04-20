@@ -3,7 +3,7 @@
 //Check whether or not the client is in mobile and adjust the filter-toggle icon based on the width of the device
 window.onresize = checkToggleFilterPosition;
 
-var QueryString = getUrlParams();
+var queryString = getUrlParams();
 
 var websocketPort = 3004;
 
@@ -184,8 +184,8 @@ var displayList;
 getUrlDisplayList(); //grab the coins from the url bar
 
 function getUrlDisplayList() {
-  if (QueryString.display) {
-    displayList = QueryString.display.toLowerCase().split(",");
+  if (queryString.display) {
+    displayList = queryString.display.toLowerCase().split(",");
   } else {
     displayList = [];
   }
@@ -235,14 +235,15 @@ function toggleReverse() {
 }
 
 function updateURL(a){
-  if (a && a.length && a.length > 0) {
+  if (a.length && a.length > 0) {
     //create the new string
-    var newParams = a.toString().toLowerCase();
+    var newSortParams = sort.value,
+        newDisplayParams = a.toString().toLowerCase();
     //put it up in the URL bar
-    window.history.replaceState(newParams, newParams, "/#display=" + newParams);
+    window.history.replaceState({ display: newDisplayParams }, "Dashboard of " + newDisplayParams, "/#sort=" + newSortParams + "&display=" + newDisplayParams);
   } else {
     //if there aren't any coins being displayed, the url should be set to root
-    window.history.replaceState("", "initial page", "/");
+    window.history.replaceState({ display: "" }, "a blank coinconsole", "/");
   }
 }
 
@@ -275,7 +276,10 @@ function updateInformation(a){
   }
 
   function sortInformationList(a){
-    ((sort.value) ? a.sortOn(sort.value) : sort.value);
+    var newUrlParams = getUrlParams();
+    console.log(newUrlParams);
+    //((sort.value) ? a.sortOn(sort.value) : sort.value); //pull sort option directly from the HTML
+    ((newUrlParams.sort) ? a.sortOn(newUrlParams.sort) : newUrlParams.sort); //pull sort option from the URL bar
     ((reverseSort) ? a.reverse() : reverseSort);
   }
 
