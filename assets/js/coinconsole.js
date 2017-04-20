@@ -74,7 +74,7 @@ socket.on('refreshTicker', function(data){
     for (var ticker in tickerData) {
       if (typeof tickerData[ticker] === "object") {
         for (var key in tickerData[ticker]) {
-          if (! isNaN(parseFloat(tickerData[ticker][key]))) {
+          if (! isNaN(parseFloat(tickerData[ticker][key])) && ! tickerData[ticker][key].match(/[a-z]/i) && ! tickerData[ticker][key] === "symbol") {
             tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
           }
         }
