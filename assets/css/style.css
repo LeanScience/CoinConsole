@@ -566,21 +566,6 @@ a:hover {
   background: #3392de;
 }
 
-.material-wave {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  margin-top: -10px;
-  margin-left: -10px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: scale(0);
-  transition: transform 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940), opacity 0.3s 0.4s;
-  pointer-events: none;
-  will-change: transform, opacity;
-  z-index: 0;
-}
-
 /* TROLLBOX */
 
 #trollbox {
