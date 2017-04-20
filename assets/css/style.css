@@ -202,6 +202,7 @@ a:hover {
 
 #filter {
   flex-flow: row wrap;
+  flex-grow: 1;
   background-color: #174da0;
   padding-top: 10px;
   margin-top: 20px;
@@ -240,6 +241,7 @@ a:hover {
 
 .active {
   font-weight: bold;
+  background-color: #222;
 }
 
 #filter-search {
@@ -333,6 +335,13 @@ a:hover {
   min-width: 20%;
 }
 
+.information-item .information-title {
+  width: 100%;
+  background: #222;
+  padding: 3px 6px;
+  margin-bottom: 5px;
+}
+
 .information-item {
   display: flex;
   flex-flow: row nowrap;
@@ -346,17 +355,17 @@ a:hover {
 }
 
 .percent-changes {
-  padding: 10px 20px !important;
+  padding: 5px 15px !important;
   background-color: #222;
   max-width: 315px;
 }
 
 .positive {
-  color: #66bb6a;
+  color: #81d873;
 }
 
 .negative {
-  color: #ef5350;
+  color: #e56262;
 }
 
 @media screen and (min-width: 768px){
