@@ -17,7 +17,7 @@ var information = document.getElementById('information'),
     totalTradeVolume = document.getElementById('total-volume'),
     bitcoinDominance = document.getElementById('btc-dominance'),
 
-    welcomeMessage = '<div class="get-started"><h2>Click a button on the filter to select which currencies you want to display on your dashboard.</h2></div>';
+    coinconsoleWelcome = '<div class="get-started"><h2>Click a button on the filter to select which currencies you want to display on your dashboard.</h2></div>';
 
 //connect to the websocket server on page load
 var socket = io.connect('//' + window.location.hostname + ':' + websocketPort),
@@ -83,18 +83,6 @@ socket.on('refreshTicker', function(data){
   updateInformation(displayList);
 });
 
-socket.on('trollbox', function(data){
-  console.log(data.name + ": " + data.message);
-});
-
-function sendChat(message, nickname){
-  if (message.length < 200){
-    socket.emit('trollbox', {"name": nickname, "message": message});
-  } else {
-    console.log("Your message was too long! Please keep it under 200 characters.");
-  }
-}
-
 //set up a function to create the filter list
 function createFilterList(a){
   filter.innerHTML = '';
@@ -158,13 +146,15 @@ toggleFilter();
 function toggleFilter() {
   if (untoggled == false) {
     //show the filter
-    filterbar.style.display = "flex";
+    filterbar.style.flexBasis = "320px";
+    filterbar.style.paddingTop = "10px";
     untoggled = true;
     document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
     checkToggleFilterPosition();
   } else if (untoggled == true) {
     //hide the filter
-    filterbar.style.display = "none";
+    filterbar.style.flexBasis = "0";
+    filterbar.style.paddingTop = "0";
     untoggled = false;
     document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
     checkToggleFilterPosition();
@@ -266,7 +256,7 @@ function updateInformation(a){
       renderInformationList(informationList);
     });
   } else {
-    information.innerHTML = welcomeMessage;
+    information.innerHTML = coinconsoleWelcome;
   }
 
   function selectInformationList(){
