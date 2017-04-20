@@ -40,7 +40,6 @@ function appendNickToTitle() {
 
 function displayMessages(a){
   truncateMessages(75, a).then(function(truncatedMessages){
-    console.log(truncatedMessages);
     tbChat.innerHTML = '';
     for (message in truncatedMessages) {
       ((typeof truncatedMessages[message] === "string") ? appendMessage(truncatedMessages[message]) : truncatedMessages[message]);
@@ -54,7 +53,7 @@ function appendMessage(s) {
 
 function truncateMessages(i, a){
   return new Promise(function(resolve, reject){
-    a.splice(i, (a.length - i));
+    a.splice(0, (a.length - i));
     resolve(a);
   });
 }
