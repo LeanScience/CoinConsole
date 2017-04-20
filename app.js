@@ -190,7 +190,7 @@ function onConnect(socket){
 
   function filterBadWords(s){
     return new Promise(function(resolve, reject){
-      var badWords = ["fuck", "bastard", "cum", "cunt", "cock", "ass", "shit", "bitch"], //require('./modules/badwords')
+      var badWords = require('./modules/badwords'),
           rgx = new RegExp(badWords.join("|"), "gi");
 
       resolve(s.replace(rgx, "****"));
