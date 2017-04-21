@@ -81,7 +81,6 @@ a:hover {
 .btn {
   background-color: white;
   border: 0;
-  border-radius: 20px;
   color: #111;
   width: auto;
   padding: 3px 5px;
@@ -100,6 +99,7 @@ a:hover {
   user-select: none;
   overflow: hidden;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .btn:hover {
@@ -210,6 +210,7 @@ a:hover {
 }
 
 #sort {
+  border-radius: 0;
   font-weight: 100;
   font-size: 16px;
   -webkit-appearance: none;
@@ -218,7 +219,7 @@ a:hover {
   outline: none;
   text-align: left;
   padding: 10px;
-  width: 94%;
+  width: 100%;
 }
 
 #sort:active {
@@ -252,8 +253,7 @@ a:hover {
   padding: 12px;
   padding-right: 0px;
   margin: 10px 0;
-  border-radius: 20px;
-  width: 90%;
+  width: calc(100% - 12px);
   box-shadow: inset rgba(0, 0, 0, 0.156863) 0px 1px 10px, rgba(0, 0, 0, 0.227451) 0px 1px 10px;
 }
 
@@ -613,7 +613,5 @@ a:hover {
 }
 
 #trollbox .submit {
-  border-radius: 0;
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
-
 }
