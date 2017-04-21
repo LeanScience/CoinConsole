@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/mwarnerdotme/coinconsole/issues"
   },
-  "homepage": "https://github.com/mwarnerdotme/coinconsole#readme",
+  "homepage": "http://coinconsole.com",
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
