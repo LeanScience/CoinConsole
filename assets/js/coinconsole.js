@@ -34,8 +34,10 @@ socket.on('init', function(){
     sort.innerHTML = '';
     var html = '',
         info = Object.keys(o[0]),
-        asyncLoop = 0,
-        sortDefault = 'rank';
+        asyncLoop = 0;
+
+    var sortDefault = ((queryString.sort) ? queryString.sort : 'rank');
+    console.log(sortDefault);
 
     //add each sort option to the dropdown
     for (var option in info){
@@ -137,13 +139,11 @@ function toggleFilter(){
   if (! untoggled){
     //show the filter
     filterbar.style.flexBasis = "320px";
-    filterbar.style.paddingTop = "10px";
     untoggled = true;
     positionFilterToggleIcon();
   } else if (untoggled){
     //hide the filter
     filterbar.style.flexBasis = "0";
-    filterbar.style.paddingTop = "0";
     untoggled = false;
     positionFilterToggleIcon();
   }
@@ -168,11 +168,7 @@ var displayList;
 getUrlDisplayList(); //grab the coins from the url bar
 
 function getUrlDisplayList() {
-  if (queryString.display) {
-    displayList = queryString.display.toLowerCase().split(",");
-  } else {
-    displayList = [];
-  }
+  ((queryString.display) ? displayList = queryString.display.toLowerCase().split(",") : displayList = []);
 }
 
 function toggleTop(){

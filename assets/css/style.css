@@ -86,6 +86,7 @@ a:hover {
   padding: 3px 5px;
   display: inline-block;
   min-width: 60px;
+  min-height: 19px;
   text-align: center;
   vertical-align: middle;
   padding: 8px 10px;
@@ -184,6 +185,8 @@ a:hover {
   /*flex: 1 1 0%;*/
   height: calc(100vh - 86px - 109px);
   width: 100%;
+  z-index: 50;
+  box-shadow: 0px 3px 10px rgba(0,0,0,.2);
 }
 
 /* Fix the #main height for firefox */
@@ -197,15 +200,13 @@ a:hover {
   background-color: #3392de;
   display: flex;
   color: white;
-  padding-top: 10px;
 }
 
-#filter {
-  flex-flow: row wrap;
-  flex-grow: 1;
-  background-color: #174da0;
-  padding-top: 10px;
-  margin-top: 20px;
+#controls {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,.2);
+  z-index: 100;
 }
 
 #sort {
@@ -225,6 +226,16 @@ a:hover {
   outline: none;
 }
 
+#filter {
+  display: flex;
+  flex-shrink: 0; /* make sure the filter stays at it's full height */
+  justify-content: space-between;
+  flex-flow: row wrap;
+  background-color: #174da0;
+  padding-top: 5px;
+  padding-right: 3px;
+}
+
 #filterbar .btn {
   margin: 10px;
   margin-left: 0;
@@ -236,7 +247,15 @@ a:hover {
 }
 
 .toggle-buttons {
-  margin: -3px 0 -10px 0;
+  display: flex;
+  max-width: 100%;
+  width: 100%;
+  justify-content: space-between;
+  flex-flow: row wrap;
+}
+
+#sort, .toggle-reverse {
+  margin-right: 0px !important;
 }
 
 .active {
@@ -391,7 +410,7 @@ a:hover {
     background-color: #2265b1;
     padding: 0 5px;
     color: white;
-    box-shadow: 0px 0px 10px 0px black;
+    box-shadow: 0px 3px 10px rgba(0,0,0,.2);
     z-index: 50;
   }
 }
@@ -464,7 +483,6 @@ a:hover {
   padding: 10px 0;
   background-color: #222;
   color: white;
-  z-index: 100;
 }
 
 #footer a {
