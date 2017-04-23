@@ -74,7 +74,7 @@ socket.on('refreshTicker', function(data){
     for (var ticker in tickerData) {
       if (typeof tickerData[ticker] === "object") {
         for (var key in tickerData[ticker]) {
-          if (! isNaN(parseFloat(tickerData[ticker][key])) && ! tickerData[ticker][key].match(/[a-z]/i) && ! tickerData[ticker][key] === "symbol") {
+          if (! isNaN(parseFloat(tickerData[ticker][key])) && ! tickerData[ticker][key] === "symbol") {
             tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
           }
         }
@@ -429,9 +429,9 @@ Array.prototype.unique = function() {
 
 Array.prototype.sortOn = function(key){
   this.sort(function(a, b){
-      if(a[key] < b[key]){
+      if (a[key] < b[key]){
           return -1;
-      }else if(a[key] > b[key]){
+      } else if (a[key] > b[key]){
           return 1;
       }
       return 0;
