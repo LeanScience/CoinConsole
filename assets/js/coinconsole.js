@@ -1,7 +1,7 @@
 "use strict";
 
 //Check whether or not the client is in mobile and adjust the filter-toggle icon based on the width of the device
-window.onresize = checkToggleFilterPosition;
+window.onresize = positionFilterToggleIcon;
 
 var queryString = getUrlParams();
 
@@ -10,6 +10,7 @@ var websocketPort = 3004;
 var information = document.getElementById('information'),
     filterbar = document.getElementById('filterbar'),
     filter = document.getElementById('filter'),
+    toggleFilterIcon = document.getElementById('filter-toggle-icon'),
     sort = document.getElementById('sort'),
 
     numberOfCurrencies = document.getElementById('total-currencies'),
@@ -74,7 +75,7 @@ socket.on('refreshTicker', function(data){
     for (var ticker in tickerData) {
       if (typeof tickerData[ticker] === "object") {
         for (var key in tickerData[ticker]) {
-          if (! isNaN(parseFloat(tickerData[ticker][key])) && ! tickerData[ticker][key] === "symbol") {
+          if (! isNaN(parseFloat(tickerData[ticker][key])) && key !== "symbol") {
             tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
           }
         }
@@ -132,39 +133,33 @@ var untoggled = false; //default is toggled
 
 toggleFilter();
 
-function toggleFilter() {
-  if (untoggled == false) {
+function toggleFilter(){
+  if (! untoggled){
     //show the filter
     filterbar.style.flexBasis = "320px";
     filterbar.style.paddingTop = "10px";
     untoggled = true;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    checkToggleFilterPosition();
-  } else if (untoggled == true) {
+    positionFilterToggleIcon();
+  } else if (untoggled){
     //hide the filter
     filterbar.style.flexBasis = "0";
     filterbar.style.paddingTop = "0";
     untoggled = false;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    checkToggleFilterPosition();
+    positionFilterToggleIcon();
   }
 }
 
-function checkToggleFilterPosition() {
-  var filterToggleIcon = document.getElementById('filter-toggle-icon');
+function positionFilterToggleIcon(){
+  if (untoggled == false){
+    ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(0deg)" : toggleFilterIcon.style.transform = "rotate(90deg)");
+  } else if (untoggled == true){
+    ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(180deg)" : toggleFilterIcon.style.transform = "rotate(270deg)");
+  }
+}
 
+function checkMobile(){
   if (window.innerWidth <= 768) {
-    if (filterToggleIcon.className === "fa fa-angle-right") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-down";
-    } else if (filterToggleIcon.className === "fa fa-angle-left") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-up";
-    }
-  } else {
-    if (filterToggleIcon.className === "fa fa-angle-up") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    } else if (filterToggleIcon.className === "fa fa-angle-down") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    }
+    return true;
   }
 }
 

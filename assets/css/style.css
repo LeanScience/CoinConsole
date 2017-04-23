@@ -206,7 +206,6 @@ a:hover {
   background-color: #174da0;
   padding-top: 10px;
   margin-top: 20px;
-  box-shadow: rgba(0, 0, 0, 0.156863) 0px -2px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
 }
 
 #sort {
@@ -377,7 +376,6 @@ a:hover {
 
   #filterbar {
     overflow-y: scroll;
-    /*display: none;*/ /* hide on page load */
     flex-flow: column nowrap;
     flex-basis: 320px;
     z-index: 75;
@@ -538,9 +536,9 @@ a:hover {
   cursor: pointer;
   width: 25%;
   height: 100%;
-  transition: .2s;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
+  transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -moz-transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -webkit-transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
