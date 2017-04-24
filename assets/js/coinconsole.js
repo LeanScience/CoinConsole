@@ -1,7 +1,7 @@
 "use strict";
 
 //Check whether or not the client is in mobile and adjust the filter-toggle icon based on the width of the device
-window.onresize = checkToggleFilterPosition;
+window.onresize = positionFilterToggleIcon;
 
 var queryString = getUrlParams();
 
@@ -10,6 +10,7 @@ var websocketPort = 3004;
 var information = document.getElementById('information'),
     filterbar = document.getElementById('filterbar'),
     filter = document.getElementById('filter'),
+    toggleFilterIcon = document.getElementById('filter-toggle-icon'),
     sort = document.getElementById('sort'),
 
     numberOfCurrencies = document.getElementById('total-currencies'),
@@ -33,8 +34,9 @@ socket.on('init', function(){
     sort.innerHTML = '';
     var html = '',
         info = Object.keys(o[0]),
-        asyncLoop = 0,
-        sortDefault = 'rank';
+        asyncLoop = 0;
+
+    var sortDefault = ((queryString.sort) ? queryString.sort : 'rank');
 
     //add each sort option to the dropdown
     for (var option in info){
@@ -74,7 +76,7 @@ socket.on('refreshTicker', function(data){
     for (var ticker in tickerData) {
       if (typeof tickerData[ticker] === "object") {
         for (var key in tickerData[ticker]) {
-          if (! isNaN(parseFloat(tickerData[ticker][key])) && ! tickerData[ticker][key].match(/[a-z]/i) && ! tickerData[ticker][key] === "symbol") {
+          if (! isNaN(parseFloat(tickerData[ticker][key])) && key !== "symbol") {
             tickerData[ticker][key] = parseFloat(tickerData[ticker][key]);
           }
         }
@@ -132,40 +134,32 @@ var untoggled = false; //default is toggled
 
 toggleFilter();
 
-function toggleFilter() {
-  if (untoggled == false) {
+function toggleFilter(){
+  if (! untoggled){
     //show the filter
     filterbar.style.flexBasis = "320px";
-    filterbar.style.paddingTop = "10px";
     untoggled = true;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    checkToggleFilterPosition();
-  } else if (untoggled == true) {
+    positionFilterToggleIcon();
+  } else if (untoggled){
     //hide the filter
     filterbar.style.flexBasis = "0";
-    filterbar.style.paddingTop = "0";
     untoggled = false;
-    document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    checkToggleFilterPosition();
+    positionFilterToggleIcon();
   }
 }
 
-function checkToggleFilterPosition() {
-  var filterToggleIcon = document.getElementById('filter-toggle-icon');
-
-  if (window.innerWidth <= 768) {
-    if (filterToggleIcon.className === "fa fa-angle-right") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-down";
-    } else if (filterToggleIcon.className === "fa fa-angle-left") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-up";
-    }
-  } else {
-    if (filterToggleIcon.className === "fa fa-angle-up") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-left";
-    } else if (filterToggleIcon.className === "fa fa-angle-down") {
-      document.getElementById('filter-toggle-icon').className = "fa fa-angle-right";
-    }
+function positionFilterToggleIcon(){
+  if (! untoggled){
+    //Change rotation if on a mobile device
+    ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(0deg)" : toggleFilterIcon.style.transform = "rotate(90deg)");
+  } else if (untoggled){
+    //Change rotation if on a mobile device
+    ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(180deg)" : toggleFilterIcon.style.transform = "rotate(270deg)");
   }
+}
+
+function checkMobile(){
+  return ((window.innerWidth <= 768) ? true : false);
 }
 
 //toggle coin data on and off
@@ -173,11 +167,7 @@ var displayList;
 getUrlDisplayList(); //grab the coins from the url bar
 
 function getUrlDisplayList() {
-  if (queryString.display) {
-    displayList = queryString.display.toLowerCase().split(",");
-  } else {
-    displayList = [];
-  }
+  ((queryString.display) ? displayList = queryString.display.toLowerCase().split(",") : displayList = []);
 }
 
 function toggleTop(){
@@ -228,6 +218,8 @@ function updateURL(a){
     //create the new string
     var newSortParams = sort.value,
         newDisplayParams = a.toString().toLowerCase();
+
+    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : sort.value);
     //put it up in the URL bar
     window.history.replaceState({ display: newDisplayParams }, "Dashboard of " + newDisplayParams, "/#sort=" + newSortParams + "&display=" + newDisplayParams);
   } else {
@@ -429,9 +421,9 @@ Array.prototype.unique = function() {
 
 Array.prototype.sortOn = function(key){
   this.sort(function(a, b){
-      if(a[key] < b[key]){
+      if (a[key] < b[key]){
           return -1;
-      }else if(a[key] > b[key]){
+      } else if (a[key] > b[key]){
           return 1;
       }
       return 0;

@@ -81,12 +81,12 @@ a:hover {
 .btn {
   background-color: white;
   border: 0;
-  border-radius: 20px;
   color: #111;
   width: auto;
   padding: 3px 5px;
   display: inline-block;
-  min-width: 60px;
+  min-width: 65px;
+  min-height: 19px;
   text-align: center;
   vertical-align: middle;
   padding: 8px 10px;
@@ -100,6 +100,7 @@ a:hover {
   user-select: none;
   overflow: hidden;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .btn:hover {
@@ -184,6 +185,8 @@ a:hover {
   /*flex: 1 1 0%;*/
   height: calc(100vh - 86px - 109px);
   width: 100%;
+  z-index: 50;
+  box-shadow: 0px 3px 10px rgba(0,0,0,.2);
 }
 
 /* Fix the #main height for firefox */
@@ -194,22 +197,21 @@ a:hover {
 }
 
 #filterbar {
-  background-color: #3392de;
+  background-color: #174da0;
   display: flex;
   color: white;
-  padding-top: 10px;
 }
 
-#filter {
-  flex-flow: row wrap;
-  flex-grow: 1;
-  background-color: #174da0;
-  padding-top: 10px;
-  margin-top: 20px;
-  box-shadow: rgba(0, 0, 0, 0.156863) 0px -2px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
+#controls {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,.2);
+  z-index: 100;
+  background: #3392de;
 }
 
 #sort {
+  border-radius: 0;
   font-weight: 100;
   font-size: 16px;
   -webkit-appearance: none;
@@ -218,11 +220,21 @@ a:hover {
   outline: none;
   text-align: left;
   padding: 10px;
-  width: 94%;
+  width: 100%;
 }
 
 #sort:active {
   outline: none;
+}
+
+#filter {
+  display: flex;
+  flex-shrink: 0; /* make sure the filter stays at it's full height */
+  justify-content: space-between;
+  flex-flow: row wrap;
+  background-color: #174da0;
+  padding-top: 5px;
+  padding-right: calc(4% - 10px);
 }
 
 #filterbar .btn {
@@ -236,7 +248,15 @@ a:hover {
 }
 
 .toggle-buttons {
-  margin: -3px 0 -10px 0;
+  display: flex;
+  max-width: 100%;
+  width: 100%;
+  justify-content: space-between;
+  flex-flow: row wrap;
+}
+
+#sort, .toggle-reverse {
+  margin-right: 0px !important;
 }
 
 .active {
@@ -252,8 +272,7 @@ a:hover {
   padding: 12px;
   padding-right: 0px;
   margin: 10px 0;
-  border-radius: 20px;
-  width: 90%;
+  width: calc(100% - 12px);
   box-shadow: inset rgba(0, 0, 0, 0.156863) 0px 1px 10px, rgba(0, 0, 0, 0.227451) 0px 1px 10px;
 }
 
@@ -377,7 +396,6 @@ a:hover {
 
   #filterbar {
     overflow-y: scroll;
-    /*display: none;*/ /* hide on page load */
     flex-flow: column nowrap;
     flex-basis: 320px;
     z-index: 75;
@@ -393,7 +411,7 @@ a:hover {
     background-color: #2265b1;
     padding: 0 5px;
     color: white;
-    box-shadow: 0px 0px 10px 0px black;
+    box-shadow: 0px 3px 10px rgba(0,0,0,.2);
     z-index: 50;
   }
 }
@@ -401,6 +419,10 @@ a:hover {
 @media screen and (max-width: 768px) {
   .hidden-mobile {
     display: none !important;
+  }
+
+  #filterbar .btn {
+    min-width: 90px;
   }
 
   .filterbar-toggle {
@@ -466,7 +488,6 @@ a:hover {
   padding: 10px 0;
   background-color: #222;
   color: white;
-  z-index: 100;
 }
 
 #footer a {
@@ -538,9 +559,9 @@ a:hover {
   cursor: pointer;
   width: 25%;
   height: 100%;
-  transition: .2s;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
+  transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -moz-transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  -webkit-transition: .2s cubic-bezier(0.250, 0.460, 0.450, 0.940);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -613,7 +634,5 @@ a:hover {
 }
 
 #trollbox .submit {
-  border-radius: 0;
   box-shadow: rgba(0, 0, 0, 0.156863) 0px 0px 5px, rgba(0, 0, 0, 0.227451) 0px 0px 5px;
-
 }

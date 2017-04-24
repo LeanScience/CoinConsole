@@ -8,7 +8,7 @@ block content
   include templates/partials/trollbox
   main#main
     div#filterbar.transition
-      div.container-fluid
+      div#controls.container-fluid
         div.search
           input#filter-search.transition(type="text" placeholder="Search..." onkeyup="filterSearch(this.value)")
           i.search-clear.fa.fa-times-circle.transition(onclick="clearSearch('filter-search')")
@@ -18,8 +18,8 @@ block content
           div.btn.btn-yellow.toggle-reverse(onclick="toggleReverse()") Reverse
           select#sort.btn.btn-blue(onchange="updateInformation(displayList)")
       ul#filter.no-margin.no-padding.container-fluid
-          //Coin toggles get placed here
+        //Coin toggles get placed here
     div.filterbar-toggle(onclick="toggleFilter()")
-      i#filter-toggle-icon
+      i#filter-toggle-icon.transition.fa.fa-angle-right
     ul#information.no-margin.container-fluid
       //Coin information gets placed here
