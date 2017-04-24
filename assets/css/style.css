@@ -85,7 +85,7 @@ a:hover {
   width: auto;
   padding: 3px 5px;
   display: inline-block;
-  min-width: 60px;
+  min-width: 65px;
   min-height: 19px;
   text-align: center;
   vertical-align: middle;
@@ -197,7 +197,7 @@ a:hover {
 }
 
 #filterbar {
-  background-color: #3392de;
+  background-color: #174da0;
   display: flex;
   color: white;
 }
@@ -207,6 +207,7 @@ a:hover {
   padding-bottom: 5px;
   box-shadow: 0px 3px 10px rgba(0,0,0,.2);
   z-index: 100;
+  background: #3392de;
 }
 
 #sort {
@@ -418,6 +419,10 @@ a:hover {
 @media screen and (max-width: 768px) {
   .hidden-mobile {
     display: none !important;
+  }
+
+  #filterbar .btn {
+    min-width: 90px;
   }
 
   .filterbar-toggle {
