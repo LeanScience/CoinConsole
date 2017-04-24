@@ -37,7 +37,6 @@ socket.on('init', function(){
         asyncLoop = 0;
 
     var sortDefault = ((queryString.sort) ? queryString.sort : 'rank');
-    console.log(sortDefault);
 
     //add each sort option to the dropdown
     for (var option in info){
@@ -150,17 +149,17 @@ function toggleFilter(){
 }
 
 function positionFilterToggleIcon(){
-  if (untoggled == false){
+  if (! untoggled){
+    //Change rotation if on a mobile device
     ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(0deg)" : toggleFilterIcon.style.transform = "rotate(90deg)");
-  } else if (untoggled == true){
+  } else if (untoggled){
+    //Change rotation if on a mobile device
     ((! checkMobile()) ? toggleFilterIcon.style.transform = "rotate(180deg)" : toggleFilterIcon.style.transform = "rotate(270deg)");
   }
 }
 
 function checkMobile(){
-  if (window.innerWidth <= 768) {
-    return true;
-  }
+  return ((window.innerWidth <= 768) ? true : false);
 }
 
 //toggle coin data on and off
@@ -219,6 +218,8 @@ function updateURL(a){
     //create the new string
     var newSortParams = sort.value,
         newDisplayParams = a.toString().toLowerCase();
+
+    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : sort.value);
     //put it up in the URL bar
     window.history.replaceState({ display: newDisplayParams }, "Dashboard of " + newDisplayParams, "/#sort=" + newSortParams + "&display=" + newDisplayParams);
   } else {
