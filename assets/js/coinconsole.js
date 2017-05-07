@@ -219,7 +219,7 @@ function updateURL(a){
     var newSortParams = sort.value,
         newDisplayParams = a.toString().toLowerCase();
 
-    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : sort.value);
+    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : newSortParams = 'rank';
     //put it up in the URL bar
     window.history.replaceState({ display: newDisplayParams }, "Dashboard of " + newDisplayParams, "/#sort=" + newSortParams + "&display=" + newDisplayParams);
   } else {
