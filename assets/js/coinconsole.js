@@ -172,7 +172,7 @@ function getUrlDisplayList() {
 
 function toggleTop(){
   toggleReset();
-  searchArray(tickerData, 200, "rank", true)
+  searchArray(tickerData, 100, "rank", true)
   .then(function(topTwoHundredData){
     for (var coin in topTwoHundredData) {
       if (topTwoHundredData[coin].symbol) {

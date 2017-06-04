@@ -2,7 +2,8 @@ extends templates/page
 
 block content
   div.branding.hidden-mobile
-    img(src="/assets/img/logo_main_xs.png" alt="CoinConsole logo" style="width: 100%" onclick="shareLink()")
+    a(href="//github.com/luminoco/coinconsole" target="_blank")
+      img(src="/assets/img/logo_main_xs.png" alt="CoinConsole logo" style="width: 100%")
   div.share
   include templates/partials/calculator
   include templates/partials/trollbox
@@ -13,7 +14,7 @@ block content
           input#filter-search.transition(type="text" placeholder="Search..." onkeyup="filterSearch(this.value)")
           i.search-clear.fa.fa-times-circle.transition(onclick="clearSearch('filter-search')")
         div.toggle-buttons
-          div.btn.btn-yellow.toggle-all(onclick="toggleTop()") Top 200
+          div.btn.btn-yellow.toggle-all(onclick="toggleTop()") Top 100
           div.btn.btn-yellow.toggle-reset(onclick="toggleReset()") Reset
           div.btn.btn-yellow.toggle-reverse(onclick="toggleReverse()") Reverse
           select#sort.btn.btn-blue(onchange="updateInformation(displayList)")
