@@ -32,11 +32,12 @@ a:hover {
 }
 
 .branding {
-  width: 75px;
-  bottom: 15px;
-  right: 4%;
-  position: absolute;
-  z-index: 125;
+  width: 50px;
+  margin-right: 10px;
+  /*bottom: 15px;*/
+  /*right: 4%;*/
+  /*position: absolute;*/
+  /*z-index: 125;*/
 }
 
 .inline {
@@ -160,12 +161,12 @@ a:hover {
   color: white;
   box-shadow: 0px 0px 10px 0px black;
   z-index: 100;
-
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   padding-top: 20px;
   padding-bottom: 20px;
+  padding: 20px 12px;
 }
 
 .global-data {
@@ -183,7 +184,8 @@ a:hover {
   background-color: white;
   color: #222;
   /*flex: 1 1 0%;*/
-  height: calc(100vh - 86px - 109px);
+  /*height: calc(100vh - 86px - 109px);*/
+  height: calc(100vh - 82px);
   width: 100%;
   z-index: 50;
   box-shadow: 0px 3px 10px rgba(0,0,0,.2);
@@ -192,7 +194,8 @@ a:hover {
 /* Fix the #main height for firefox */
 @media screen and (min--moz-device-pixel-ratio:0) {
   #main {
-    height: calc(100vh - 86px - 116px);
+    /*height: calc(100vh - 86px - 116px);*/
+    height: calc(100vh - 82px);
   }
 }
 
