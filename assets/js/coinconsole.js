@@ -172,7 +172,7 @@ function getUrlDisplayList() {
 
 function toggleTop(){
   toggleReset();
-  searchArray(tickerData, 200, "rank", true)
+  searchArray(tickerData, 100, "rank", true)
   .then(function(topTwoHundredData){
     for (var coin in topTwoHundredData) {
       if (topTwoHundredData[coin].symbol) {
@@ -219,7 +219,7 @@ function updateURL(a){
     var newSortParams = sort.value,
         newDisplayParams = a.toString().toLowerCase();
 
-    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : newSortParams = 'rank';
+    ((sort.value === "" && queryString.sort) ? newSortParams = queryString.sort : newSortParams = sort.value);
     //put it up in the URL bar
     window.history.replaceState({ display: newDisplayParams }, "Dashboard of " + newDisplayParams, "/#sort=" + newSortParams + "&display=" + newDisplayParams);
   } else {
